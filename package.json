@@ -2,6 +2,7 @@
   "name": "SKBot",
   "dependencies": {
     "async": "^2.6.0",
+    "babel-preset-es2015": "^6.24.1",
     "express": "^4.16.2",
     "irc": "^0.5.2",
     "jsdom": "^11.6.2",
