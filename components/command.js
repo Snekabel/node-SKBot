@@ -15,7 +15,7 @@ class Command {
     for(var i in sc) {
       var s = sc[i];
       if(s == service) {
-        console.log("OLD");
+        //console.log("OLD");
       }
       else {
         others.push(s);

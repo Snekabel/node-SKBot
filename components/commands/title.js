@@ -17,15 +17,18 @@ class Title extends Command {
     console.log("Test Command Loaded");
   }
 
-  evaluate(input) {
+  evaluate(input, service) {
+    var services = super.getServices(service);
+
     //var answers = [];
-    return new Promise(function (fulfill, reject){
+    //return new Promise(function (fulfill, reject){
       var start = (new Date).getTime();
+      var message = input.message;
 
       //return answers;
       var links = [];
 
-      var split = input.split(/\s+/);
+      var split = message.split(/\s+/);
       for(var i in split) {
         var word = split[i];
         //console.log("Word: ",word);
@@ -42,33 +45,38 @@ class Title extends Command {
           );
         }
       }
+
       if(links.length == 0) {
-        reject();
+        //reject();
       }
       else {
         console.log("Links",links);
           var answers = [];
-          async.each(links, function(item, callback){
-            JSDOM.fromURL.bind(this,item.href)().then(dom => {
+          for(var i in links) {
+            JSDOM.fromURL.bind(this,links[i].href)().then(dom => {
               var title = dom.window.document.querySelector("title").innerHTML;
               console.log("Title:",title);
               if(title != null) {
                 //callback(null, {"text":title});
                 answers.push({"text":title});
-                callback();
+                service.writeLine(input.to, ("Title: "+title));
+                //callback();
               }
               else {
                 //callback("No title",null);
-                callback();
+                //callback();
               }
             });
+          }
+
+          /*async.each(links, function(item, callback){
           },
           function() {
-            console.log("Answers",answers);
+            //console.log("Answers",answers);
             var stop = (new Date).getTime();
-            answers.push({"text": ("Time: "+(stop-start))})
-            fulfill(answers);
-          });
+            //answers.push({"text": ("Time: "+(stop-start))})
+            //fulfill(answers);
+          });*/
 
           /*
           var jobs = [];
@@ -111,7 +119,7 @@ class Title extends Command {
             }
           });*/
       }
-    });
+    //});
   }
 }
 export default Title;
