@@ -1,0 +1,12 @@
+{
+  "name": "SKBot",
+  "dependencies": {
+    "async": "^2.6.0",
+    "express": "^4.16.2",
+    "irc": "^0.5.2",
+    "jsdom": "^11.6.2",
+    "lame": "^1.2.4",
+    "mumble": "^0.3.12",
+    "promise": "^8.0.1"
+  }
+}
