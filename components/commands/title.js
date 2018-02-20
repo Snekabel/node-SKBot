@@ -20,8 +20,6 @@ class Title extends Command {
   evaluate(input, service) {
     var services = super.getServices(service);
 
-    //var answers = [];
-    //return new Promise(function (fulfill, reject){
       var start = (new Date).getTime();
       var message = input.message;
 
@@ -46,80 +44,25 @@ class Title extends Command {
         }
       }
 
-      if(links.length == 0) {
-        //reject();
-      }
-      else {
-        console.log("Links",links);
-          var answers = [];
-          for(var i in links) {
-            JSDOM.fromURL.bind(this,links[i].href)().then(dom => {
-              var title = dom.window.document.querySelector("title").innerHTML;
-              console.log("Title:",title);
-              if(title != null) {
-                //callback(null, {"text":title});
-                answers.push({"text":title});
-                service.writeLine(input.to, ("Title: "+title));
-                //callback();
-              }
-              else {
-                //callback("No title",null);
-                //callback();
-              }
-            });
-          }
-
-          /*async.each(links, function(item, callback){
-          },
-          function() {
-            //console.log("Answers",answers);
-            var stop = (new Date).getTime();
-            //answers.push({"text": ("Time: "+(stop-start))})
-            //fulfill(answers);
-          });*/
-
-          /*
-          var jobs = [];
-          for(var i in links) {
-            var link = links[i];
-            //console.log("Link: ",link);
-            jobs.push(
-              function (callback) {
-                if(link.href != null) {
-                  JSDOM.fromURL.bind(this,link.href)().then(dom => {
-                    var title = dom.window.document.querySelector("title").innerHTML;
-                    console.log("Title:",title);
-                    if(title != null) {
-                      callback(null, {"text":title});
-                    }
-                    else {
-                      callback("No title",null);
-                    }
-                  });
-
-                  callback(null, link.href);
-                }
-                else {
-                  callback("No href",null);
-                }
-              }
-              //.bind(this,link)
-            );
-          }*/
-          //console.log("We got some links");
-          //reject();
-          /*async.series(jobs, function (err, allresults) {
-            if(err) {
-              reject();
+      console.log("Links",links);
+        for(var i in links) {
+          JSDOM.fromURL.bind(this,links[i].href)().then(dom => {
+            var title = dom.window.document.querySelector("title").innerHTML;
+            console.log("Title:",title);
+            if(title != null) {
+              service.writeLine(input.to, ("Title: "+title));
             }
-            fulfill(allresults);
-            //console.log("all Results",allresults);
-            for(var i in allresults) {
-              //console.log(allresults[i]);
-            }
-          });*/
-      }
-    //});
+          });
+        }
+
+        /*async.each(links, function(item, callback){
+        },
+        function() {
+          //console.log("Answers",answers);
+          var stop = (new Date).getTime();
+          //answers.push({"text": ("Time: "+(stop-start))})
+          //fulfill(answers);
+        });*/
   }
 }
 export default Title;

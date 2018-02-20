@@ -13,7 +13,6 @@ var api = new Api(cc, sc, set);
 export default sc;
 
 
-//module.exports.main = main;
 //console.log(set.settings);
 //console.log(cc.commands);
 //cc.commands.test.evaluate("test");

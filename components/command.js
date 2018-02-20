@@ -21,16 +21,6 @@ class Command {
         others.push(s);
       }
     }
-    /*for(var i in sc) {
-      var service = sc[i];
-
-      if(service.writeLine != null) {
-        console.log("Write Line: ",service.writeLine);
-      }
-      if(service.playSound != null) {
-        console.log("Play Sound: ", service.playSound);
-      }
-    }*/
     return others;
   }
 }

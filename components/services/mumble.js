@@ -45,16 +45,22 @@ class Mumble {
         client.on( 'textMessage', function (data) {
           var user = sessions[data.actor];
           console.log(user.name + ':', data.message);
+          var input = {
+            "message": databasea.message,
+            "from": user.name,
+            "to": null
+          };
           for(var command in this.cc.commands) {
-            this.cc.commands[command].evaluate(data.message).done(function(answers){
-              for(var answer in answers) {
-                if(answers[answer].audio != null) {
-                  this.play.bind(this, client, answers[answer].audio)();
-                }
-                client.user.channel.sendMessage(answers[answer].text);
-              }
-            }, function(reject) {console.log("Rejected")});
+            this.cc.commands[command].evaluate(input, this);
           }
+          /*this.cc.commands[command].evaluate(data.message).done(function(answers){
+            for(var answer in answers) {
+              if(answers[answer].audio != null) {
+                this.play.bind(this, client, answers[answer].audio)();
+              }
+              client.user.channel.sendMessage(answers[answer].text);
+            }
+          }, function(reject) {console.log("Rejected")});*/
         }.bind(this));
     }.bind(this));
     //console.log(this.start);
@@ -64,7 +70,7 @@ class Mumble {
 
   }
   writeLine(text) {
-    console.log(text);
+    this.client.user.channel.sendMessage(text);
   }
 
   play(client, audio_file) {
