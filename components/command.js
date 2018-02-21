@@ -1,8 +1,8 @@
 class Command {
 
   constructor() {
-    this.helpDescription="";
-    this.shortDescription="";
+    this.helpDescription="No helptext for this command";
+    this.shortDescription="No helptext for this command";
   }
 
   evaluate(input) {

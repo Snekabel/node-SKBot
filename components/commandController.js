@@ -1,4 +1,5 @@
 //import Test from './commands/test';
+var reRequire = require('re-require-module').reRequire;
 
 class CommandController {
   constructor() {
@@ -9,9 +10,9 @@ class CommandController {
   }
 
   loadCommand(commandName) {
-    var command = require('./commands/'+commandName).default;
+    var command = reRequire('./commands/'+commandName).default;
     //console.log(command);
-    this.commands[commandName] = (new command());
+    this.commands[commandName] = (new command(this));
   }
 
   /*setSC(serviceController) {

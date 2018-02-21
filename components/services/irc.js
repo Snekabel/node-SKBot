@@ -13,12 +13,12 @@ class IRC {
     client.addListener('message', function (from, to, message) {
       console.log(from + ' => ' + to + ': ' + message);
 
+      var input = {
+        "message": message,
+        "from": from,
+        "to": to
+      };
       for(var command in this.cc.commands) {
-        var input = {
-          "message": message,
-          "from": from,
-          "to": to
-        };
         this.cc.commands[command].evaluate(input, this);
       }
     }.bind(this));

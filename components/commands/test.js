@@ -3,11 +3,13 @@ var Promise = require('promise');
 
 class Test extends Command {
 
-  constructor(serviceController) {
+  constructor() {
     super();
 
     this.helpDescription = "Test Help";
     this.shortDescription= "TH";
+
+    this.counter = 0;
   }
 
   evaluate(input, service) {
@@ -17,7 +19,8 @@ class Test extends Command {
     var answers = [];
     var message = input.message;
     if(message == "test"){
-      answers.push({"text": "EVAL IS Test"});
+      answers.push({"text": "EVAL IS Test: "+this.counter});
+      this.counter++;
     }
     else if(message == "pokemon") {
       answers.push({"text": "Playing Pokémon", "audio": "102-palette_town_theme.mp3"});
