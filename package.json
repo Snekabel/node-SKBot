@@ -8,6 +8,7 @@
     "jsdom": "^11.6.2",
     "lame": "^1.2.4",
     "mumble": "^0.3.12",
-    "promise": "^8.0.1"
+    "promise": "^8.0.1",
+    "re-require-module": "^1.0.2"
   }
 }
