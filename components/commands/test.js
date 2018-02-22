@@ -34,6 +34,9 @@ class Test extends Command {
     else if(message == "pentiums") {
       answers.push({"text": "Weird Al Yankovic - It's all about the Pentiums", "audio": "./Music/Weird Al Yankovic- All About The Pentiums.mp3"});
     }
+    else if(message == "youtube") {
+      service.playYoutube("http://youtube.com/watch?v=ZI-ol25RFws");
+    }
 
     if(input.from == "tb") {
       answers.push({"text": "TB was here"});

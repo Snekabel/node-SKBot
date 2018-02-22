@@ -36,7 +36,7 @@ class Title extends Command {
           {
             word = word.substring(0, word.indexOf("\""));
           }
-          console.log("Website!",word);
+          //console.log("Website!",word);
 
           links.push(
             url.parse(word)

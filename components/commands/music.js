@@ -1,5 +1,4 @@
 import Command from '../command';
-const stream = require("youtube-audio-stream");
 
 
 class Music extends Command {
@@ -11,12 +10,6 @@ class Music extends Command {
     this.shortDescription= "Template Short Help";
 
     this.playlist = [];
-
-    var url = "http://youtube.com/watch?v=ZI-ol25RFws";
-    const lame = require('lame');
-    const Speaker = require('speaker');
-
-    stream(url).pipe(new lame.Decoder).pipe(new Speaker);
   }
 
   evaluate(input, service) {
@@ -26,13 +19,31 @@ class Music extends Command {
     var message = input.message;
     var split = message.split(/\s+/);
 
-    /*for(var i in split) {
-      if(split[i].indexOf("http://"))
-    }*/
+    if(split[0].indexOf("youtube") > -1){
+      for(var i in split) {
+        var url = this.cleanURL(split[i]);
+        console.log("Try: ",url);
+        if(url.indexOf("http") > -1) {
+          console.log("lol ",url);
+          service.playYoutube(url);
+        }
+      }
+    }
   }
 
   addMusic(song) {
     this.template.push(song);
+  }
+
+  cleanURL(dirtyURL) {
+    var cleanURL = dirtyURL.substring(dirtyURL.indexOf("https://"));
+    console.log("Clean1: ", cleanURL);
+    if(cleanURL.indexOf("\"") > -1)
+    {
+      cleanURL = cleanURL.substring(0, cleanURL.indexOf("\""));
+    }
+    console.log("Clean2: ", cleanURL);
+    return cleanURL;
   }
 }
 export default Music;

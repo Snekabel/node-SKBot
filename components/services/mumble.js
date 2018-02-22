@@ -1,13 +1,14 @@
-var lame = require('lame');
-var mumble = require( 'mumble' );
-var fs = require('fs');
+const lame = require('lame');
+const mumble = require( 'mumble' );
+const fs = require('fs');
+const stream = require("youtube-audio-stream");
 
 class Mumble {
   constructor(hostConfig, commandController) {
     console.log("Loading Mumble with config", hostConfig);
     this.cc = commandController;
-    this.stream = null;
-    this.decode = null;
+    //this.stream = null;
+    //this.decode = null;
 
     mumble.connect( hostConfig.mumble_url, function( error, client ) {
         if( error ) { throw new Error( error ); }
@@ -71,6 +72,22 @@ class Mumble {
     this.client.user.channel.sendMessage(text);
   }
 
+  playYoutube(url) {
+    /*var decoder = new lame.Decoder();
+    decoder.on('format', function( format ) {
+        //console.log( format );
+        stream.pipe(this.client.inputStream({
+              channels: format.channels,
+              sampleRate: format.sampleRate,
+              gain: 0.005
+          })
+        );
+    }.bind(this));*/
+    url = this.cleanURL(url);
+    console.log("Mumble URL", url);
+    stream(url).pipe(new lame.Decoder).pipe(this.client.inputStream());
+  }
+
   playSound(audio_file, callback) {
     var client = this.client;
     var stream = this.stream;
@@ -107,6 +124,15 @@ class Mumble {
 
     //stream = process.stdin.pipe( decoder );
     stream = fs.createReadStream(audio_file).pipe(this.decoder);
+  }
+
+  cleanURL(dirtyURL) {
+    var cleanURL = dirtyURL.substring(dirtyURL.indexOf("http://"));
+    if(dirtyURL.indexOf("\"") > -1)
+    {
+      cleanURL = dirtyURL.substring(0, dirtyURL.indexOf("\""));
+    }
+    return cleanURL;
   }
 }
 
