@@ -45,9 +45,13 @@ class Test extends Command {
         service.writeLine(input.to,answers[i].text);
       }
       if(service.playSound) {
-        service.playSound(answers[i].audio);
+        service.playSound(answers[i].audio, this.next);
       }
     }
+  }
+
+  next() {
+    console.log("Done");
   }
 }
 export default Test;

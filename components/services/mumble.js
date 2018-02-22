@@ -13,7 +13,7 @@ class Mumble {
         if( error ) { throw new Error( error ); }
 
         //client.authenticate('mp3-' + unique);
-        //this.client = client;
+        this.client = client;
         client.authenticate(hostConfig.name,null,[hostConfig.token]);
         client.on( 'initialized', function() {
           //console.log(this.start);
@@ -46,7 +46,7 @@ class Mumble {
           var user = sessions[data.actor];
           console.log(user.name + ':', data.message);
           var input = {
-            "message": databasea.message,
+            "message": data.message,
             "from": user.name,
             "to": null
           };
@@ -66,16 +66,13 @@ class Mumble {
     //console.log(this.start);
   }
 
-  playSound() {
-
-  }
-  writeLine(text) {
+  writeLine(to, text) {
+    //console.log(text);
     this.client.user.channel.sendMessage(text);
   }
 
-  play(client, audio_file) {
-
-    //var client = this.client;
+  playSound(audio_file, callback) {
+    var client = this.client;
     var stream = this.stream;
     if(stream != null) {
       stream.end();
@@ -84,7 +81,7 @@ class Mumble {
 
     var input = client.inputStream();
     if(input != null) {
-      console.log(input);
+      //console.log(input);
       input.close();
     }
 
@@ -105,6 +102,8 @@ class Mumble {
           })
         );
     }.bind(this));
+
+    this.decoder.on('close', callback);
 
     //stream = process.stdin.pipe( decoder );
     stream = fs.createReadStream(audio_file).pipe(this.decoder);
