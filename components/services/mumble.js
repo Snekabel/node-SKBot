@@ -1,7 +1,7 @@
 const lame = require('lame');
 const mumble = require( 'mumble' );
 const fs = require('fs');
-const stream = require("youtube-audio-stream");
+const streamy = require("youtube-audio-stream");
 
 class Mumble {
   constructor(hostConfig, commandController) {
@@ -73,19 +73,23 @@ class Mumble {
   }
 
   playYoutube(url) {
-    /*var decoder = new lame.Decoder();
+    url = this.cleanURL(url);
+    console.log("Mumble URL", url);
+    var stream;
+    var decoder = new lame.Decoder();
+
     decoder.on('format', function( format ) {
         //console.log( format );
         stream.pipe(this.client.inputStream({
               channels: format.channels,
               sampleRate: format.sampleRate,
-              gain: 0.005
+              gain: 0.05
           })
         );
-    }.bind(this));*/
-    url = this.cleanURL(url);
-    console.log("Mumble URL", url);
-    stream(url).pipe(new lame.Decoder).pipe(this.client.inputStream());
+    }.bind(this));
+    stream = streamy(url).pipe(decoder);
+
+    //stream(url).pipe(new lame.Decoder).pipe(this.client.inputStream());
   }
 
   playSound(audio_file, callback) {
