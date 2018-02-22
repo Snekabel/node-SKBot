@@ -1,4 +1,6 @@
 import Command from '../command';
+const stream = require("youtube-audio-stream");
+
 
 class Music extends Command {
 
@@ -9,6 +11,12 @@ class Music extends Command {
     this.shortDescription= "Template Short Help";
 
     this.playlist = [];
+
+    var url = "http://youtube.com/watch?v=ZI-ol25RFws";
+    const lame = require('lame');
+    const Speaker = require('speaker');
+
+    stream(url).pipe(new lame.Decoder).pipe(new Speaker);
   }
 
   evaluate(input, service) {
@@ -18,9 +26,9 @@ class Music extends Command {
     var message = input.message;
     var split = message.split(/\s+/);
 
-    for(var i in split) {
+    /*for(var i in split) {
       if(split[i].indexOf("http://"))
-    }
+    }*/
   }
 
   addMusic(song) {
