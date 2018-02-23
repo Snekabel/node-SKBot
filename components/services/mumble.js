@@ -84,7 +84,8 @@ class Mumble {
       this.playing = false;
     }
   }
-  playYoutube(url, onEnd) {
+
+  playSound(url, onEnd) {
     url = this.cleanURL(url);
     console.log("Mumble URL", url);
     //var stream;
@@ -141,7 +142,7 @@ class Mumble {
     //stream(url).pipe(new lame.Decoder).pipe(this.client.inputStream());
   }
 
-  playSound(audio_file, callback) {
+  /*playSound(audio_file, callback) {
     var client = this.client;
     var stream = this.stream;
     if(stream != null) {
@@ -177,7 +178,7 @@ class Mumble {
 
     //stream = process.stdin.pipe( decoder );
     stream = fs.createReadStream(audio_file).pipe(this.decoder);
-  }
+  }*/
 
   cleanURL(dirtyURL) {
     var cleanURL = dirtyURL.substring(dirtyURL.indexOf("http://"));

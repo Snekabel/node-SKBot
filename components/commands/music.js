@@ -10,6 +10,8 @@ class Music extends Command {
     this.shortDescription= "Template Short Help";
 
     this.playlist = [];
+    this.currentSong = -1;
+    this.repeat = false;
   }
 
   evaluate(input, service) {
@@ -50,6 +52,10 @@ class Music extends Command {
       this.playlist = [];
       service.writeLine(input.from, "Playlist Clean");
     }
+    else if(split[0].indexOf("!repeat") > -1) {
+      this.repeat = !this.repeat;
+      service.writeLine(input.from, "Repeat: "+this.repeat);
+    }
   }
 
   addMusic(song) {
@@ -59,14 +65,21 @@ class Music extends Command {
   playNext(service) {
     console.log("PLAY NEXT!");
     console.log("Service Playing",service.playing);
+    this.currentSong++;
     if(service.playing) {
-      this.playlist.shift();
+      //this.playlist.shift();
     }
 
-    if(this.playlist.length > 0) {
-      service.playYoutube(this.playlist[0], function() {
+    if(this.playlist.length > this.currentSong) {
+      service.playSound(this.playlist[this.currentSong], function() {
         this.playNext(service);
       }.bind(this));
+    }
+    else {
+      this.currentSong = -1;
+      if(this.repeat) {
+        this.playNext(service);
+      }
     }
   }
 
