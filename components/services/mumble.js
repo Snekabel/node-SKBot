@@ -7,7 +7,7 @@ class Mumble {
   constructor(hostConfig, commandController) {
     console.log("Loading Mumble with config", hostConfig);
     this.cc = commandController;
-    //this.stream = null;
+    this.stream = null;
     //this.decode = null;
 
     mumble.connect( hostConfig.mumble_url, function( error, client ) {
@@ -52,7 +52,12 @@ class Mumble {
             "to": null
           };
           for(var command in this.cc.commands) {
-            this.cc.commands[command].evaluate(input, this);
+            try {
+              this.cc.commands[command].evaluate(input, this)
+            }
+            catch(err) {
+              console.error(err);
+            }
           }
           /*this.cc.commands[command].evaluate(data.message).done(function(answers){
             for(var answer in answers) {
@@ -72,22 +77,66 @@ class Mumble {
     this.client.user.channel.sendMessage(text);
   }
 
-  playYoutube(url) {
+  stopSound() {
+    if(this.stream != null) {
+      this.stream.end();
+      this.stream.unpipe();
+      this.playing = false;
+    }
+  }
+  playYoutube(url, onEnd) {
     url = this.cleanURL(url);
     console.log("Mumble URL", url);
-    var stream;
+    //var stream;
     var decoder = new lame.Decoder();
+    if(this.stream != null) {
+      this.stream.end();
+      this.stream.unpipe();
+      //this.stream.close();
+    }
 
     decoder.on('format', function( format ) {
         //console.log( format );
-        stream.pipe(this.client.inputStream({
+        this.playing = true;
+        this.stream.pipe(this.client.inputStream({
               channels: format.channels,
               sampleRate: format.sampleRate,
               gain: 0.05
           })
         );
     }.bind(this));
-    stream = streamy(url).pipe(decoder);
+    try {
+      this.stream = streamy(url).pipe(decoder);
+      //console.log(this.stream);
+      this.stream.on('format', function(format) {
+        console.log("FORMAT", format);
+      })
+      this.stream.on('close', function(g) {
+        console.log("Close ",g);
+      })
+      this.stream.on('finish', function(finish) {
+        console.log("Finish ",finish);
+        if(onEnd != null) {
+          onEnd();
+        }
+      })
+      this.stream.on('prefinish', function(prefinish) {
+        console.log("Prefinish ",prefinish);
+      })
+      this.stream.on('end', function(end) {
+        console.log("End ",end);
+      })
+      this.stream.on('error', function(error) {
+        console.log("Error ",error);
+      })
+      //this.stream.on
+      //console.log(decoder._events);
+      console.log(this.stream._events);
+    }
+    catch(err) {
+      console.error(err);
+    }
+
 
     //stream(url).pipe(new lame.Decoder).pipe(this.client.inputStream());
   }

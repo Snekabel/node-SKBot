@@ -19,20 +19,55 @@ class Music extends Command {
     var message = input.message;
     var split = message.split(/\s+/);
 
-    if(split[0].indexOf("youtube") > -1){
+    console.log(this.playlist);
+
+    if(split[0].indexOf("!add") > -1){
       for(var i in split) {
         var url = this.cleanURL(split[i]);
         console.log("Try: ",url);
         if(url.indexOf("http") > -1) {
-          console.log("lol ",url);
-          service.playYoutube(url);
+          //console.log("lol ",url);
+          this.addMusic(url);
+          service.writeLine(input.from, url+" added to playlist");
         }
       }
+    }
+    else if(split[0].indexOf("!play") > -1) {
+      if(this.playlist.length > 0) {
+        this.playNext(service);
+      }
+    }
+    else if(split[0].indexOf("!stop") > -1) {
+      service.stopSound();
+    }
+    else if(split[0].indexOf("!next") > -1 || split[0].indexOf("!skip") > -1) {
+      this.playNext(service);
+    }
+    else if(split[0].indexOf("!list") > -1) {
+      service.writeLine(input.from, this.playlist.toString());
+    }
+    else if(split[0].indexOf("!clean") > -1) {
+      this.playlist = [];
+      service.writeLine(input.from, "Playlist Clean");
     }
   }
 
   addMusic(song) {
-    this.template.push(song);
+    this.playlist.push(song);
+  }
+
+  playNext(service) {
+    console.log("PLAY NEXT!");
+    console.log("Service Playing",service.playing);
+    if(service.playing) {
+      this.playlist.shift();
+    }
+
+    if(this.playlist.length > 0) {
+      service.playYoutube(this.playlist[0], function() {
+        this.playNext(service);
+      }.bind(this));
+    }
   }
 
   cleanURL(dirtyURL) {
