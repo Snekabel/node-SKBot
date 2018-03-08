@@ -35,7 +35,7 @@ class Test extends Command {
       answers.push({"text": "Weird Al Yankovic - It's all about the Pentiums", "audio": "./Music/Weird Al Yankovic- All About The Pentiums.mp3"});
     }
     else if(message == "youtube") {
-      service.playYoutube("http://youtube.com/watch?v=ZI-ol25RFws");
+      service.playSound("http://youtube.com/watch?v=ZI-ol25RFws");
     }
 
     if(input.from == "tb") {
@@ -48,7 +48,7 @@ class Test extends Command {
         service.writeLine(input.to,answers[i].text);
       }
       if(service.playSound) {
-        service.playSound(answers[i].audio, this.next);
+        //service.playSound(answers[i].audio, this.next);
       }
     }
   }

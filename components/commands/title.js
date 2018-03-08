@@ -29,14 +29,15 @@ class Title extends Command {
       var split = message.split(/\s+/);
       for(var i in split) {
         var word = split[i];
-        //console.log("Word: ",word);
+        console.log("Word: ",word);
         if(word.indexOf("http://") > -1 || word.indexOf("https://") > -1) {
-          var word = word.substring(word.indexOf("http://"));
+          /*var word = word.substring((word.indexOf("http://")||word.indexOf("https://")));
           if(word.indexOf("\"") > -1)
           {
             word = word.substring(0, word.indexOf("\""));
-          }
-          //console.log("Website!",word);
+          }*/
+          word = this.cleanURL(word);
+          console.log("Website!",word);
 
           links.push(
             url.parse(word)
@@ -63,6 +64,16 @@ class Title extends Command {
           //answers.push({"text": ("Time: "+(stop-start))})
           //fulfill(answers);
         });*/
+  }
+  cleanURL(dirtyURL) {
+    var cleanURL = dirtyURL.substring(dirtyURL.indexOf("https://"));
+    console.log("Clean1: ", cleanURL);
+    if(cleanURL.indexOf("\"") > -1)
+    {
+      cleanURL = cleanURL.substring(0, cleanURL.indexOf("\""));
+    }
+    console.log("Clean2: ", cleanURL);
+    return cleanURL;
   }
 }
 export default Title;

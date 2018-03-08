@@ -56,6 +56,14 @@ class Music extends Command {
       this.repeat = !this.repeat;
       service.writeLine(input.from, "Repeat: "+this.repeat);
     }
+    else if(split[0].indexOf("!vol+") > -1) {
+      service.incrementVolume(0.2);
+      service.writeLine(input.from, "Volume: "+service.volume);
+    }
+    else if(split[0].indexOf("!vol-") > -1) {
+      service.decreaseVolume(0.2);
+      service.writeLine(input.from, "Volume: "+service.volume);
+    }
   }
 
   addMusic(song) {
