@@ -118,7 +118,6 @@ class MumbleService {
                 channel: this.configuration.channel,
                 message: `A user left from the mumble server, but i had no client data associated with the client id: ${data.session}...`
             };
-            console.debug('Why is this undefined?', data.session, this.sessions);
             this.pluginsService.trigger(msgObj, this);
             return;
         }
@@ -148,7 +147,6 @@ class MumbleService {
             message: `User joined: ${data.name}`
         };
         this.pluginsService.trigger(msgObj, this);
-        console.debug('EVT_USER_CONNECT', data);
     }
 
     cleanMessage(message) {
@@ -172,7 +170,6 @@ class MumbleService {
     }
 
     playSound(url) {
-        console.debug('playSound', url);
         var decoder = new lame.Decoder();
         if(this.stream != null) {
             this.stream.end();

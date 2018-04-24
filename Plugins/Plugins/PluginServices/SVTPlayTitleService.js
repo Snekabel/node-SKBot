@@ -32,7 +32,6 @@ class SVTPlayTitleService {
 
                     service.say(retString, channel);
                 }.bind(this));
-                console.debug('SVT', data);
             }.bind(this));
     }
 

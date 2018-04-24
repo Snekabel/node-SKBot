@@ -22,13 +22,11 @@ class IRCMumbleUsers {
      * @return {boolean}
      */
     supportsAction(input, service) {
-        console.debug("INPUT!", input);
         for (const item of this.reportFromIRCChannels) {
             if (input.protocol === PROTOCOLS.IRC
                 && input.message === TRIGGER+"mumble"
                 && input.hostname === item.IRC.hostname
                 && input.channel === item.IRC.channel) {
-                console.debug("INPUT TRUE!", input);
                 return true;
             }
         }
@@ -45,12 +43,9 @@ class IRCMumbleUsers {
             return false;
         }
         const destinationServer = this.findServerTo(input);
-        console.debug('destinationServer', destinationServer);
         if (destinationServer !== false) {
             let mumbleUsers = destinationServer.server.getUsers().map((user) => user.user);
-            console.debug('mumbleUsers', mumbleUsers);
             mumbleUsers = mumbleUsers.join(", ");
-            console.debug('mumbleUsers 2', mumbleUsers);
             service.say("Mumble users: "+mumbleUsers, input.channel);
         }
     }
