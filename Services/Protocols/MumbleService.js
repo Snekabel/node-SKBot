@@ -150,9 +150,7 @@ class MumbleService {
     }
 
     cleanMessage(message) {
-        console.log('Should clean?', message);
         if (message.startsWith('<a href=') || message.startsWith('href=')) {
-            console.log('clean', message.substring(message.indexOf('>'), message.lastIndexOf('<')));
             return message.substring(message.indexOf('>')+1, message.lastIndexOf('<'));
         }
         return message;

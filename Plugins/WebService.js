@@ -56,7 +56,7 @@ class WebService {
             const {JSDOM} = jsdom;
             const dom = new JSDOM(html);
             const $ = (require('jquery'))(dom.window);
-            return $("title").text();
+            return $("title:first").text();
         });
     }
 

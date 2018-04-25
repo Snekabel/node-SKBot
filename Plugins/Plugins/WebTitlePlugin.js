@@ -58,7 +58,9 @@ class WebTitlePlugin {
                 }
 
                 this.webService.downloadTitle(part).then(function (data) {
-                    service.say(`Title: ${data}`, input.channel);
+                    if (data.trim().length > 0) {
+                        service.say(`Title: ${data}`, input.channel);
+                    }
                 });
             }
         }
