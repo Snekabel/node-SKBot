@@ -1,13 +1,14 @@
-import {PROTOCOLS, MSG_TYPES, TRIGGER} from "../../Constants";
-import pluginsService from "../PluginsService";
+import {PROTOCOLS, MSG_TYPES} from "../../Constants";
 
 class CrosstalkPlugin {
-    constructor(PluginsService) {
+    constructor(PluginsService, mTrigger) {
         this.pluginsService = PluginsService;
+        this.mTrigger = mTrigger;
         this.supportsAction = this.supportsAction.bind(this);
-        this.findServerTo = this.findServerTo.bind(this);
         this.trigger = this.trigger.bind(this);
+        this.findServerTo = this.findServerTo.bind(this);
         this.crosstalks = [
+            /*
             {
                 from: {
                     protocol: PROTOCOLS.MUMBLE,
@@ -25,7 +26,7 @@ class CrosstalkPlugin {
                 from: {
                     protocol: PROTOCOLS.IRC,
                     hostname: "irc.oftc.net",
-                    channel: "#snekabel"
+                    channel: "#snekabel",
                 },
                 to: {
                     protocol: PROTOCOLS.MUMBLE,
@@ -34,7 +35,7 @@ class CrosstalkPlugin {
                     prepend: "IRC: ",
                 }
             }
-
+            */
         ];
     }
 
@@ -46,7 +47,8 @@ class CrosstalkPlugin {
      */
     supportsAction(input, service) {
         for (const crosstalk of this.crosstalks) {
-            if (!input.message.startsWith(TRIGGER)
+            if (!input.message.startsWith(this.mTrigger)
+            && !input.message.includes('Title: ')
             && input.protocol === crosstalk.from.protocol
             && input.hostname === crosstalk.from.hostname
             && input.channel === crosstalk.from.channel) {
@@ -71,7 +73,7 @@ class CrosstalkPlugin {
             if (input.type === MSG_TYPES.MESSAGE) {
                 msg = `${destinationServer.to.prepend}(${input.user}): ${input.message}`;
             } else {
-                msg = `${destinationServer.to.prepend}: ${input.message}`;
+                msg = `${destinationServer.to.prepend} ${input.message}`;
             }
             destinationServer.server.say(msg, destinationServer.to.channel);
         }
@@ -98,11 +100,18 @@ class CrosstalkPlugin {
         const servers = this.pluginsService.getServers();
         for (const server of servers) {
             const sconfig = server.configuration;
+            let channels = [];
+            if('channels' in sconfig) {
+                channels = sconfig.channels;
+            } else if ('channel' in sconfig) {
+                channels = [sconfig.channel];
+            }
             /*
             *The format of a "channel" varies depending on the service,
             *It can either be an array or a string. Only take protocol into account for now
             */
-            if (dCrosstalk.protocol === sconfig.protocol) {
+            if (dCrosstalk.protocol === sconfig.protocol
+                && channels.includes(dCrosstalk.channel)) {
                 return {
                     server: server,
                     to: dCrosstalk,

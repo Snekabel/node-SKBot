@@ -1,8 +1,7 @@
-export const NAME = 'SKBot';
-export const VERSION = '2018-04-23';
+export const NAME = 'NoBat';
+export const VERSION = '2018-06-01';
 export const CONFIG_FILE = 'Main.json';
 export const DEBUG = true;
-export const TRIGGER = '!';
 
 export const PROTOCOLS = {
     IRC: 'IRC',

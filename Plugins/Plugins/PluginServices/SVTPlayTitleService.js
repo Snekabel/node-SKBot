@@ -1,4 +1,3 @@
-var cheerio = require("cheerio");
 import WebService from '../../WebService'
 
 class SVTPlayTitleService {
@@ -19,7 +18,7 @@ class SVTPlayTitleService {
 
         this.webService.download(input)
             .then(function (data) {
-                let $ = cheerio.load(data);
+                let $ = this.webService.jquery(data);
                 let videoId = $('video[data-video-id]').attr('data-video-id');
                 return videoId;
 

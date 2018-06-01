@@ -7,8 +7,10 @@ import VimeoTitleService from "./PluginServices/VimeoTitleService";
 import YoutubeTitleService from "./PluginServices/YoutubeTitleService";
 
 class WebTitlePlugin {
-    constructor() {
+    constructor(PluginsService) {
+        this.pluginsService = PluginsService;
         this.webService = new WebService();
+        this.sqlService = this.pluginsService.getSQLService();
         this.childServices = [
             new PriceTitleService(),
             new SteamTitleService(),
@@ -56,13 +58,40 @@ class WebTitlePlugin {
                         return;
                     }
                 }
-
-                this.webService.downloadTitle(part).then(function (data) {
-                    if (data.trim().length > 0) {
-                        service.say(`Title: ${data}`, input.channel);
+                this.webService.downloadTitle(part).then((data) => {
+                    const hasTitle = data.length > 0;
+                    if (hasTitle) {
+                        this.sendTitle(input, service, part, data);
+                    }
+                    if (!hasTitle) {
+                        this.webService.downloadTitle(part, true).then((data) => {
+                            this.sendTitle(input, service, part, data);
+                        });
                     }
                 });
             }
+        }
+    }
+
+    sendTitle(input, service, part, title) {
+        const hasTitle = title.length > 0;
+        if (part.length > 80) {
+            this.sqlService.query('INSERT INTO links_short (link) VALUES (?)', [part]).then((result) => {
+                const [OkPacket] = result;
+                const num = OkPacket.insertId;
+                const base36 = num.toString(36);
+                const shortLink = `http://s.erikwelander.se/${base36}`;
+
+                if (hasTitle) {
+                    service.say(`Title: (${shortLink}) ${title}`, input.channel);
+                } else {
+                    service.say(`Short: ${shortLink}`, input.channel);
+                }
+            }).catch((err) => {
+                console.log('Failed to insert link!', err);
+            })
+        } else if (hasTitle) {
+            service.say(`Title: ${title}`, input.channel);
         }
     }
 }

@@ -2,6 +2,8 @@ import {PROTOCOLS, MSG_TYPES} from '../../Constants';
 var irc = require('irc');
 
 const EVT_TEXT_MESSAGE = 'message';
+const EVT_USER_JOINED = 'join';
+const EVT_USER_REMOVE = 'part';
 const EVT_ERROR = 'error';
 const EVT_PM = 'pm';
 
@@ -23,6 +25,8 @@ class IRCService {
         this.EVT_TEXT_MESSAGE = this.EVT_TEXT_MESSAGE.bind(this);
         this.EVT_PM = this.EVT_PM.bind(this);
         this.EVT_ERROR = this.EVT_ERROR.bind(this);
+        this.EVT_USER_JOINED = this.EVT_USER_JOINED.bind(this);
+        this.EVT_USER_REMOVE = this.EVT_USER_REMOVE.bind(this);
         this.say = this.say.bind(this);
 
         this.connect();
@@ -38,6 +42,8 @@ class IRCService {
         this.client.addListener(EVT_TEXT_MESSAGE, this.EVT_TEXT_MESSAGE);
         this.client.addListener(EVT_PM, this.EVT_PM);
         this.client.addListener(EVT_ERROR, this.EVT_ERROR);
+        this.client.addListener(EVT_USER_JOINED, this.EVT_USER_JOINED);
+        this.client.addListener(EVT_USER_REMOVE, this.EVT_USER_REMOVE);
     }
 
     getConfiguration() {
@@ -55,6 +61,30 @@ class IRCService {
             message: message
         };
 
+        this.pluginsService.trigger(msgObj, this);
+    }
+
+    EVT_USER_JOINED(channel, nick, userObj) {
+        const msgObj = {
+            protocol: PROTOCOLS.IRC,
+            type: MSG_TYPES.USER_JOINED,
+            hostname: this.configuration.hostname,
+            user: nick,
+            channel: channel,
+            message: `User ${nick} joined ${channel}`
+        };
+        this.pluginsService.trigger(msgObj, this);
+    }
+
+    EVT_USER_REMOVE(channel, nick, ignoreThis, userObj) {
+        const msgObj = {
+            protocol: PROTOCOLS.IRC,
+            type: MSG_TYPES.USER_LEFT,
+            hostname: this.configuration.hostname,
+            user: nick,
+            channel: channel,
+            message: `User ${nick} left ${channel}`
+        };
         this.pluginsService.trigger(msgObj, this);
     }
 

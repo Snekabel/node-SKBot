@@ -6,7 +6,10 @@ const SUPPORTED_DOMAINS = {
     www_blocket_se: 'www.blocket.se',
     new_webhallen_com: 'new.webhallen.com',
     www_inet_se: 'www.inet.se',
-    www_tradera_com: 'www.tradera.com'
+    www_tradera_com: 'www.tradera.com',
+    www_kjell_com: 'www.kjell.com',
+    www_clasohlson_com: 'www.clasohlson.com',
+    www_biltema_se: 'www.biltema.se'
 };
 
 class PriceTitleService {
@@ -30,7 +33,7 @@ class PriceTitleService {
             return;
         }
         input = this.replaceUrl(input);
-        this.webService.download(input)
+        this.webService.download(input, true)
             .then(function (data) {
                 this.handleDomain(input, channel, service, data);
             }.bind(this));
@@ -45,7 +48,8 @@ class PriceTitleService {
 
     handleDomain(input, channel, service, data) {
         let $ = this.webService.jquery(data);
-        let title = $("title").text();
+        let title = $("title:first").text();
+        title = this.webService.cleanString(title);
         let hostname = this.webService.getHostName(input);
         switch (hostname) {
 
@@ -54,7 +58,6 @@ class PriceTitleService {
                     let fixedPrice = $(".view-item-fixed-price");
                     if (fixedPrice.length !== 0) {
                         fixedPrice = fixedPrice.text().trim();
-                        fixedPrice = fixedPrice.replace('kr', 'sek');
                         service.say(`Title: ${title}. Price: ${fixedPrice}.`, channel);
 
                         return;
@@ -84,7 +87,7 @@ class PriceTitleService {
                     published = published[published.length-1].trim();
                     let location = $('.area_label').text().trim();
 
-                    let msg = `Title: ${title}. Price: ${price} sek. Published: ${published}. Location: ${location}.`;
+                    let msg = `Title: ${title}. Price: ${price}. Published: ${published}. Location: ${location}.`;
                     msg = msg.replace(/\n/g, "");
                     service.say(msg, channel);
                 })();
@@ -110,7 +113,7 @@ class PriceTitleService {
                         price = parseInt(price);
                         price = formatNumber(price);
 
-                        service.say(`Title: ${name} - Webhallen.com. Price: ${price} sek.`, channel);
+                        service.say(`Title: ${name} - Webhallen.com. Price: ${price} kr.`, channel);
                     });
                 })();
                 break;
@@ -123,6 +126,32 @@ class PriceTitleService {
                     price = formatNumber(price);
 
                     service.say(`Title: ${title}. Price: ${price} kr.`, channel);
+                })();
+                break;
+
+            case SUPPORTED_DOMAINS.www_kjell_com:
+                (() => {
+
+                    let price = $(".mainPrice").text().trim();
+                    if (price.indexOf("-") === -1) {
+                        price = price.replace(":", ".");
+                    }
+                    service.say(`Title: ${title}. Price: ${price} kr`, channel);
+                })();
+                break;
+
+            case SUPPORTED_DOMAINS.www_clasohlson_com:
+                (() => {
+                    let price = $(".productPriceCurrent").text().trim();
+                    service.say(`Title: ${title}. Price: ${price} kr`, channel);
+                })();
+                break;
+
+            case SUPPORTED_DOMAINS.www_biltema_se:
+                (() => {
+                    let price = $(".productPriceQuantity").eq(1).find("span").text();
+                    price = price.split("S")[0];
+                    service.say(`Title: ${title}. Price: ${price} kr`, channel);
                 })();
                 break;
         }

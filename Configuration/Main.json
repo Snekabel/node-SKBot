@@ -1,19 +1,33 @@
 {
-  "servers": [{
-    "protocol": "IRC",
-    "hostname": "irc.oftc.net",
-    "port": 6667,
-    "nick": "SKBot",
-    "channels":[
-      "#zubat-testing"
-    ]
-    }, {
-    "protocol": "MUMBLE",
-    "hostname": "mumble.0x5e.se",
-    "port": 64738,
-    "nick":"SKBot",
-    "channel": "mumble.0x5e.se",
-    "tokens": ["Lol123!"]
+  "trigger": "!",
+  "mysql": {
+    "host": "192.168.88.2",
+    "user": "nobat",
+    "password": "nobat",
+    "database": "nobat"
+  },
+  "servers": [
+    {
+      "protocol": "IRC",
+      "hostname": "irc.oftc.net",
+      "port": 6667,
+      "nick": "NoBat",
+      "channels": [
+        "#flummon",
+        "#ix",
+        "#snekabel",
+        "#nobat-testing"
+      ]
+    },
+    {
+      "protocol": "MUMBLE",
+      "hostname": "mumble.0x5e.se",
+      "port": 64738,
+      "nick": "NoBat",
+      "channel": "#SK",
+      "tokens": [
+        "Lol123!"
+      ]
     }
   ]
 }

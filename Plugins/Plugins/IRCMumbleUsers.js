@@ -1,9 +1,9 @@
-import { PROTOCOLS, TRIGGER } from "../../Constants";
-import pluginsService from "../PluginsService";
+import { PROTOCOLS } from "../../Constants";
 
 class IRCMumbleUsers {
-    constructor(PluginsService) {
+    constructor(PluginsService, mTrigger) {
         this.pluginsService = PluginsService;
+        this.mTrigger = mTrigger;
         this.reportFromIRCChannels = [{
             IRC: {
                 hostname: "irc.oftc.net",
@@ -14,6 +14,10 @@ class IRCMumbleUsers {
                 channel: 'mumble.0x5e.se',
             }
         }];
+
+        this.supportsAction = this.supportsAction.bind(this);
+        this.trigger = this.trigger.bind(this);
+        this.findServerTo = this.findServerTo.bind(this);
     }
     /**
      * Does this service support this action?
@@ -24,7 +28,7 @@ class IRCMumbleUsers {
     supportsAction(input, service) {
         for (const item of this.reportFromIRCChannels) {
             if (input.protocol === PROTOCOLS.IRC
-                && input.message === TRIGGER+"mumble"
+                && input.message === this.mTrigger+"mumble"
                 && input.hostname === item.IRC.hostname
                 && input.channel === item.IRC.channel) {
                 return true;

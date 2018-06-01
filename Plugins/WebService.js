@@ -1,9 +1,23 @@
 const { URL } = require('url');
-var rp = require('request-promise');
+const rp = require('request-promise');
 const jsdom = require('jsdom');
+const Entities = require('html-entities').AllHtmlEntities;
 
 const TIMEOUT = 10000;
-const USERAGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36';
+const USERAGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36';
+
+const cleanString = (str) => {
+    if (!str) {
+        return undefined;
+    }
+    str = str.trim();
+    str = str.replace(/\r?\n|\r|\t/g, '');
+
+    const entities = new Entities();
+    str = entities.decode(str);
+
+    return str;
+};
 
 class WebService {
 
@@ -38,11 +52,13 @@ class WebService {
      * @param url
      * @return {promise}
      */
-    download(url) {
+    download(url, isGzip = false) {
         return rp({
             url: url,
             timeout: TIMEOUT,
-            headers: {'User-Agent': USERAGENT}
+            headers: {'User-Agent': USERAGENT},
+            jar: rp.jar(),
+            gzip: isGzip
         });
     }
 
@@ -51,12 +67,17 @@ class WebService {
      * @param url
      * @returns {promise}
      */
-    downloadTitle(url) {
-        return this.download(url).then(function (html) {
+    downloadTitle(url, isGzip = false) {
+        return this.download(url, isGzip).then(function (html) {
             const {JSDOM} = jsdom;
             const dom = new JSDOM(html);
-            const $ = (require('jquery'))(dom.window);
-            return $("title:first").text();
+            const tdom = dom.window.document.querySelector("title");
+            if (!dom || !tdom) {
+                return "";
+            }
+            let title = tdom.innerHTML;
+            title = cleanString(title);
+            return title;
         });
     }
 
@@ -66,6 +87,10 @@ class WebService {
         const $ = (require('jquery'))(dom.window);
 
         return $;
+    }
+
+    cleanString(str) {
+        return cleanString(str);
     }
 }
 

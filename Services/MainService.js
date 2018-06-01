@@ -1,6 +1,7 @@
 import IRCService from "./Protocols/IRCService"
 import MumbleService from "./Protocols/MumbleService"
 import PluginsService from "../Plugins/PluginsService";
+import SQLService from "./SQLService";
 
 var fs = require('fs');
 import {NAME, VERSION, CONFIG_FILE, PROTOCOLS} from "../Constants";
@@ -8,10 +9,15 @@ import {NAME, VERSION, CONFIG_FILE, PROTOCOLS} from "../Constants";
 class MainService {
     constructor() {
         this.configuration = {};
+        this.trigger = '';
         this.servers = [];
-        this.createServices = this.createServices.bind(this);
-        this.createServer = this.createServer.bind(this);
+        this.sqlService = null;
         this.getServers = this.getServers.bind(this);
+        this.getSQLService = this.getSQLService.bind(this);
+        this.createServers = this.createServers.bind(this);
+        this.createServer = this.createServer.bind(this);
+        this.createSQLService = this.createSQLService.bind(this);
+        this.createTriggerString = this.createTriggerString.bind(this);
 
         console.log(`========== STARTING ${NAME} v ${VERSION} ==========`);
         console.log(`Loading configuration file ${CONFIG_FILE}...`);
@@ -21,13 +27,19 @@ class MainService {
             process.exit(1);
         }
 
+        console.log('Loading SQL service...')
+        this.createSQLService();
+
         console.log('Loading plugins...');
-        this.pluginsService = new PluginsService(this);
-        console.log('Creating services...');
-        this.createServices();
+        this.createTriggerString();
+        this.pluginsService = new PluginsService(this, this.trigger);
+
+        console.log('Creating server services...');
+        this.createServers();
+
     }
 
-    createServices() {
+    createServers() {
         if (this.configuration.servers != null) {
             let servers = this.configuration.servers;
             for (let server of servers) {
@@ -37,6 +49,7 @@ class MainService {
     }
 
     createServer(server) {
+
         switch (server.protocol) {
             case PROTOCOLS.IRC:
                 (() => {
@@ -49,10 +62,27 @@ class MainService {
                 })();
                 break;
         }
+
+    }
+
+    createSQLService() {
+        if (this.configuration.mysql) {
+            this.sqlService = new SQLService(this.configuration.mysql);
+        }
+    }
+
+    createTriggerString() {
+        if (this.configuration.trigger) {
+            this.trigger = this.configuration.trigger;
+        }
     }
 
     getServers() {
         return this.servers;
+    }
+
+    getSQLService() {
+        return this.sqlService;
     }
 
     loadConfiguration() {
