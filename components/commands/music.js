@@ -76,7 +76,9 @@ class Music extends Command {
     this.currentSong++;
     if(service.playing) {
       //this.playlist.shift();
+console.log("Playing!");
     }
+    else { console.log("Not playing");}
 
     if(this.playlist.length > this.currentSong) {
       service.playSound(this.playlist[this.currentSong], function() {
