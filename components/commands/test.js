@@ -34,6 +34,9 @@ class Test extends Command {
     else if(message == "pentiums") {
       answers.push({"text": "Weird Al Yankovic - It's all about the Pentiums", "audio": "./Music/Weird Al Yankovic- All About The Pentiums.mp3"});
     }
+    else if(message == "phone") {
+      answers.push({"audio": "./Gmod\ Bananaphone.mp3"});
+    }
     else if(message == "youtube") {
       service.playSound("http://youtube.com/watch?v=ZI-ol25RFws");
     }
@@ -47,8 +50,8 @@ class Test extends Command {
       if(service.writeLine) {
         service.writeLine(input.to,answers[i].text);
       }
-      if(service.playSound) {
-        //service.playSound(answers[i].audio, this.next);
+      if(service.playSound && answers[i].audio) {
+        service.playSound(answers[i].audio, this.next);
       }
     }
   }

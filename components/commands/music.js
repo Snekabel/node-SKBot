@@ -1,4 +1,5 @@
 import Command from '../command';
+//import settings from
 
 
 class Music extends Command {
@@ -12,6 +13,7 @@ class Music extends Command {
     this.playlist = [];
     this.currentSong = -1;
     this.repeat = false;
+    this.cI = null;
   }
 
   evaluate(input, service) {
@@ -21,7 +23,7 @@ class Music extends Command {
     var message = input.message;
     var split = message.split(/\s+/);
 
-    console.log(this.playlist);
+    //console.log(this.playlist);
 
     if(split[0].indexOf("!add") > -1){
       for(var i in split) {
