@@ -6,7 +6,7 @@ class Reload extends Command {
     this.cc = commandController;
   }
 
-  evaluate(input,service){
+  evaluateMessage(input,service){
     var split = input.message.split(/\s+/);
     if(split[0] == "reload" && split.length > 1) {
       service.writeLine(input.to, (split[1]+" reloaded"));

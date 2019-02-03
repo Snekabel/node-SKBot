@@ -134,13 +134,13 @@ class Mumble extends Service {
     };
     for(var command in this.cc.commands) {
       try {
-        this.cc.commands[command].evaluate(input, this)
+        this.cc.commands[command].evaluateMessage(input, this)
       }
       catch(err) {
         console.error(err);
       }
     }
-    /*this.cc.commands[command].evaluate(data.message).done(function(answers){
+    /*this.cc.commands[command].evaluateMessage(data.message).done(function(answers){
       for(var answer in answers) {
         if(answers[answer].audio != null) {
           this.play.bind(this, client, answers[answer].audio)();

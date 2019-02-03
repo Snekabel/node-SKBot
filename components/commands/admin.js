@@ -2,7 +2,7 @@ import Command from '../command';
 
 class Template extends Command {
 
-  constructor() {
+  constructor(state) {
     super();
 
     this.helpDescription = "Template Long Help";

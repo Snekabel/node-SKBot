@@ -6,7 +6,7 @@ class Help extends Command {
     this.cc = commandController;
   }
 
-  evaluate(input,service){
+  evaluateMessage(input,service){
     var split = input.message.split(/\s+/);
     if(split[0] == "help") {
       if(split.length > 0) {

@@ -17,7 +17,7 @@ class Title extends Command {
     console.log("Test Command Loaded");
   }
 
-  evaluate(input, service) {
+  evaluateMessage(input, service) {
     var services = super.getServices(service);
 
       var start = (new Date).getTime();

@@ -5,7 +5,7 @@ class Command {
     this.shortDescription="No helptext for this command";
   }
 
-  evaluate(input) {
+  evaluateMessage(input) {
   }
 
   getServices(service) {

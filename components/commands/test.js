@@ -12,7 +12,7 @@ class Test extends Command {
     this.counter = 0;
   }
 
-  evaluate(input, service) {
+  evaluateMessage(input, service) {
     //console.log("service",service);
     var services = super.getServices(service);
 

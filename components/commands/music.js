@@ -17,7 +17,7 @@ class Music extends Command {
     this.cI = null;
   }
 
-  evaluate(input, service) {
+  evaluateMessage(input, service) {
     //console.log("service",service);
     var services = super.getServices(service);
 
