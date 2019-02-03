@@ -5,7 +5,8 @@ class Settings {
   constructor(commandController, serviceController) {
     this.settings = {
       sqlhost: null,
-      api_port: null
+      api_port: null,
+      commandInitiator: "!"
     }
     this.commandController = commandController;
     this.serviceController = serviceController;
@@ -20,11 +21,18 @@ class Settings {
         "mysql_host":{},
         "mumble": [],
         "email": [],
-        "irc": []
+        "irc": [],
+        "commandInitiator": "!"
       }
       fs.writeFileSync('settings.json', JSON.stringify(baseSettings));
       console.log("Edit settings.json to add services for the bot");
       process.exit(1);
+    }
+  }
+
+  saveConfig() {
+    for(service in this.serviceController.services) {
+      console.log(service.hostConfig);
     }
   }
 
@@ -38,6 +46,9 @@ class Settings {
   addMumbleHost(newHost) {
     this.serviceController.loadService("mumble", newHost);
   }
+  addDiscordHost(newHost) {
+    this.serviceController.loadService("discord", newHost);
+  }
   addEmailHost(newHost) {
     this.settings.email_connections.push(newHost);
   }
@@ -46,6 +57,9 @@ class Settings {
   }
   setAPIPort(newPort) {
     this.settings.api_port = newPort;
+  }
+  setCommandInitiator(commandInitiator) {
+    this.settings.commandInitiator = commandInitiator;
   }
 
   parseSettings() {
@@ -57,6 +71,13 @@ class Settings {
       for(var row in json.mumble) {
         //console.log(row, this.json[row]);
         this.addMumbleHost(json.mumble[row]);
+      }
+    }
+    if(json.discord != null) {
+      console.log(json.discord);
+      for(var row in json.discord) {
+        //console.log(row, this.json[row]);
+        this.addDiscordHost(json.discord[row]);
       }
     }
     if(json.email != null) {
@@ -80,6 +101,9 @@ class Settings {
       if(json.api.port != null) {
         this.setAPIPort(json.api.port);
       }
+    }
+    if(json.commandInitiator != null) {
+      this.setCommandInitiator(json.commandInitiator);
     }
   }
 

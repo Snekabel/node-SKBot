@@ -1,4 +1,6 @@
 import Command from '../command';
+const {getYoutube} = require("../lib");
+//import settings from
 
 
 class Music extends Command {
@@ -12,6 +14,7 @@ class Music extends Command {
     this.playlist = [];
     this.currentSong = -1;
     this.repeat = false;
+    this.cI = null;
   }
 
   evaluate(input, service) {
@@ -21,7 +24,7 @@ class Music extends Command {
     var message = input.message;
     var split = message.split(/\s+/);
 
-    console.log(this.playlist);
+    //console.log(this.playlist);
 
     if(split[0].indexOf("!add") > -1){
       for(var i in split) {
@@ -29,8 +32,11 @@ class Music extends Command {
         console.log("Try: ",url);
         if(url.indexOf("http") > -1) {
           //console.log("lol ",url);
+          if(getYoutube(url)) {
+            console.log("Youtube Info: ");
+          };
           this.addMusic(url);
-          service.writeLine(input.from, url+" added to playlist");
+          service.writeLine(input.to, " added to playlist");
         }
       }
     }
@@ -46,23 +52,23 @@ class Music extends Command {
       this.playNext(service);
     }
     else if(split[0].indexOf("!list") > -1) {
-      service.writeLine(input.from, this.playlist.toString());
+      service.writeLine(input.to, "Songlist: "+this.playlist.toString());
     }
     else if(split[0].indexOf("!clean") > -1) {
       this.playlist = [];
-      service.writeLine(input.from, "Playlist Clean");
+      service.writeLine(input.to, "Playlist Clean");
     }
     else if(split[0].indexOf("!repeat") > -1) {
       this.repeat = !this.repeat;
-      service.writeLine(input.from, "Repeat: "+this.repeat);
+      service.writeLine(input.to, "Repeat: "+this.repeat);
     }
     else if(split[0].indexOf("!vol+") > -1) {
       service.incrementVolume(0.2);
-      service.writeLine(input.from, "Volume: "+service.volume);
+      service.writeLine(input.to, "Volume: "+service.volume);
     }
     else if(split[0].indexOf("!vol-") > -1) {
       service.decreaseVolume(0.2);
-      service.writeLine(input.from, "Volume: "+service.volume);
+      service.writeLine(input.to, "Volume: "+service.volume);
     }
   }
 
@@ -76,7 +82,9 @@ class Music extends Command {
     this.currentSong++;
     if(service.playing) {
       //this.playlist.shift();
+      console.log("Playing!");
     }
+    else { console.log("Not playing");}
 
     if(this.playlist.length > this.currentSong) {
       service.playSound(this.playlist[this.currentSong], function() {

@@ -12,7 +12,7 @@ class CommandController {
   loadCommand(commandName) {
     var command = reRequire('./commands/'+commandName).default;
     //console.log(command);
-    this.commands[commandName] = (new command(this));
+    this.commands[commandName] = (new command(this, state));
   }
 
   /*setSC(serviceController) {

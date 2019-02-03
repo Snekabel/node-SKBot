@@ -28,9 +28,6 @@ class Test extends Command {
     else if(message == "dragonforce") {
       answers.push({"text": "Playing Dragon Force: Through the Fire and the Flames", "audio": "./Music/Dragon Force - Through the Fire and Flames.mp3"});
     }
-    else if(message == "håll käften") {
-      answers.push({"text": "HÅLL KÄFTEN", "audio": "shutup.mp3"});
-    }
     else if(message == "pentiums") {
       answers.push({"text": "Weird Al Yankovic - It's all about the Pentiums", "audio": "./Music/Weird Al Yankovic- All About The Pentiums.mp3"});
     }
@@ -44,11 +41,11 @@ class Test extends Command {
 
     for(var i in answers) {
       console.log(answers[i].text);
-      if(service.writeLine) {
+      if(service.writeLine && answers[i].text) {
         service.writeLine(input.to,answers[i].text);
       }
-      if(service.playSound) {
-        //service.playSound(answers[i].audio, this.next);
+      if(service.playSound && answers[i].audio) {
+        service.playSound(answers[i].audio, this.next);
       }
     }
   }

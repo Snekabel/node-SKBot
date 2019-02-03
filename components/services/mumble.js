@@ -53,7 +53,7 @@ class Mumble extends Service {
   }
 
   playSound(url, onEnd) {
-    url = lib.cleanURL(url);
+    //url = lib.cleanURL(url);
     console.log("Mumble URL", url);
     //var stream;
     var decoder = new lame.Decoder();
