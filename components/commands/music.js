@@ -71,7 +71,10 @@ class Music extends Command {
       service.writeLine(input.to, "Volume: "+service.volume);
     }
   }
-
+  evaluateFile(input) {
+    return;
+  }
+  
   addMusic(song) {
     this.playlist.push(song);
   }

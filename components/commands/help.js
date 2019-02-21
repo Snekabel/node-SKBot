@@ -18,5 +18,8 @@ class Help extends Command {
 
     }
   }
+  evaluateFile(input) {
+    return;
+  }
 }
 export default Help;

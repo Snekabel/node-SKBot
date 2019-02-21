@@ -8,6 +8,9 @@ class Command {
   evaluateMessage(input) {
   }
 
+  evaluateFile(input) {
+  }
+
   getServices(service) {
     var sc = require("../main").default.services;
     var others = [];

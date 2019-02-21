@@ -65,6 +65,10 @@ class Title extends Command {
           //fulfill(answers);
         });*/
   }
+  evaluateFile(input) {
+    return;
+  }
+
   cleanURL(dirtyURL) {
     var cleanURL = dirtyURL.substring(dirtyURL.indexOf("https://"));
     console.log("Clean1: ", cleanURL);

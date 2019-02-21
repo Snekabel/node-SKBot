@@ -41,5 +41,8 @@ class Template extends Command {
       }
     }
   }
+  evaluateFile(input) {
+    return;
+  }
 }
 export default Template;

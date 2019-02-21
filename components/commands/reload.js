@@ -13,6 +13,9 @@ class Reload extends Command {
       this.reload(split[1]);
     }
   }
+  evaluateFile(input) {
+    return;
+  }
 
   reload(commandName) {
     this.cc.loadCommand(commandName);
