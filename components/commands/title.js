@@ -78,9 +78,9 @@ class Title extends Command {
       var pathname = link.href.split("/");
       var id = pathname[pathname.length-1].split("-")[0];
 
-      if(data) {
+      /*if(data) {
         price = data.offer.price;
-      }
+      }*/
     }
 
     if(title != null && title != "") {
