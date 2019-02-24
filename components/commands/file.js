@@ -8,12 +8,14 @@ var async = require("async");
 
 class File extends Command {
 
-  constructor(commandController) {
+  constructor(commandController, commandSettings) {
     super();
 
     this.helpDescription = "Downloads files linked to the bot and sends the content to other commands for parsing";
     this.shortDescription= "Downloads files linked to the bot.";
     this.cc = commandController;
+
+    console.log("Settings: ",commandSettings);
 
   }
 
@@ -74,7 +76,7 @@ class File extends Command {
 
       console.log(link)
       // When to not Download
-      
+
     }
   }
 
