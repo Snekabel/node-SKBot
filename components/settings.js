@@ -53,7 +53,7 @@ class Settings {
     this.settings.email_connections.push(newHost);
   }
   addCommand(newCommand) {
-    this.commandController.loadCommand(newCommand.name);
+    this.commandController.loadCommand(newCommand);
   }
   setAPIPort(newPort) {
     this.settings.api_port = newPort;
