@@ -34,7 +34,7 @@ class Api {
         let line = req.body.username+" joined Snekabel "+req.body.game+" server";
         console.log(line);
         //this.sc.services["mumble"].writeLine("Snekabel", line);
-        this.sc.services["discord"].writeLine("nobat-brygga", line);
+        this.sc.services["discord"].writeLine("skitsnack", line);
         res.send(JSON.stringify({status:"ok", playerName: req.body.username}));
       }.bind(this))
       router.post('/api/v'+this.versionnumber+'/gameserver/playerDisconnected', function(req, res) {
@@ -44,7 +44,7 @@ class Api {
         let line = req.body.username+" left Snekabel "+req.body.game+" server";
         console.log(line);
         //this.sc.services["mumble"].writeLine("Snekabel", line);
-        this.sc.services["discord"].writeLine("nobat-brygga", line);
+        this.sc.services["discord"].writeLine("skitsnack", line);
         res.send(JSON.stringify({status:"ok", playerName: req.body.username}));
       }.bind(this))
 

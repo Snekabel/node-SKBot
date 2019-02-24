@@ -97,13 +97,21 @@ class Discord extends Service {
     };
     for(var command in this.cc.commands) {
       try {
+<<<<<<< HEAD
         this.cc.commands[command].evaluateMessage(input, this)
+=======
+        this.cc.commands[command].evaluate(input, this)
+>>>>>>> 4fb91b6b74e87f1adf9c0db4416bf69667a77c0b
       }
       catch(err) {
         console.error(err);
       }
     }
+<<<<<<< HEAD
     /*this.cc.commands[command].evaluateMessage(data.message).done(function(answers){
+=======
+    /*this.cc.commands[command].evaluate(data.message).done(function(answers){
+>>>>>>> 4fb91b6b74e87f1adf9c0db4416bf69667a77c0b
       for(var answer in answers) {
         if(answers[answer].audio != null) {
           this.play.bind(this, client, answers[answer].audio)();
@@ -129,6 +137,7 @@ class Discord extends Service {
 
   playSound(url, onEnd) {
     console.log("PLAY SOUND!",url, onEnd);
+<<<<<<< HEAD
 
     //console.log("Goto join a voicechannel!");
     let channel = this.client.channels.find("name", this.voicechannel);
@@ -155,6 +164,29 @@ class Discord extends Service {
       });
       //channel.playStream(readStream);
     }
+=======
+    var readStream = fs.createReadStream(url);
+    console.log(this.voicechannel);
+    if(!this.voicechannel) {
+      console.log("Goto join a voicechannel!");
+      let channel = this.client.channels.find("name", "General");
+      console.log(channel);
+      if(channel) {
+        channel.join().then(connection => {
+          //resolve(connection);
+          this.audiochannel = connection;
+          console.log("Joined Audiochannel!");
+          this.audiochannel.playStream(readStream);
+        });
+        //channel.playStream(readStream);
+      }
+    }
+    else {
+      this.audiochannel.playStream(readStream);
+    }
+    /*
+    */
+>>>>>>> 4fb91b6b74e87f1adf9c0db4416bf69667a77c0b
   }
 }
 

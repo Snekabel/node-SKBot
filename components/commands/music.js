@@ -74,7 +74,7 @@ class Music extends Command {
   evaluateFile(input) {
     return;
   }
-  
+
   addMusic(song) {
     this.playlist.push(song);
   }
