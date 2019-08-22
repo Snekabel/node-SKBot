@@ -9,10 +9,11 @@ class CommandController {
     //this.loadCommand('test');
   }
 
-  loadCommand(commandName) {
+  loadCommand(commandSettings) {
+    let commandName = commandSettings.name;
     var command = reRequire('./commands/'+commandName).default;
-    //console.log(command);
-    this.commands[commandName] = (new command(this));
+    console.log("Loading ",commandName);
+    this.commands[commandName] = (new command(commandSettings));
   }
 
   /*setSC(serviceController) {
@@ -20,5 +21,5 @@ class CommandController {
   }*/
 }
 
-
-export default CommandController;
+var commandController = new CommandController();
+export default commandController;

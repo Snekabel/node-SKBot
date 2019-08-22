@@ -1,18 +1,27 @@
 var fs = require('fs');
+import commandController from './commandController';
+import serviceController from './serviceController';
+import api from './api';
 
 class Settings {
 
   constructor(commandController, serviceController) {
     this.settings = {
       sqlhost: null,
-      api_port: null
+      api: {
+        port: null
+      },
+      commandInitiator: "!"
     }
-    this.commandController = commandController;
-    this.serviceController = serviceController;
+    /*commandController = commandController;
+    serviceController = serviceController;*/
+  }
 
+  readFile() {
     if(fs.existsSync("settings.json")) {
       var raw = fs.readFileSync('settings.json').toString();
       this.json = JSON.parse(raw);
+      console.log(this.json);
       this.parseSettings();
     }
     else {
@@ -29,27 +38,34 @@ class Settings {
     }
   }
 
+  saveConfig() {
+    for(service in serviceController.services) {
+      console.log(service.hostConfig);
+    }
+  }
+
   setSQLHost(newHost) {
     this.settings.sqlhost = newHost;
   }
 
   addIRCHost(newHost) {
-    this.serviceController.loadService("irc", newHost);
+    serviceController.loadService("irc", newHost);
   }
   addMumbleHost(newHost) {
-    this.serviceController.loadService("mumble", newHost);
+    serviceController.loadService("mumble", newHost);
   }
   addDiscordHost(newHost) {
-    this.serviceController.loadService("discord", newHost);
+    serviceController.loadService("discord", newHost);
   }
   addEmailHost(newHost) {
     this.settings.email_connections.push(newHost);
   }
   addCommand(newCommand) {
-    this.commandController.loadCommand(newCommand.name);
+    commandController.loadCommand(newCommand);
   }
-  setAPIPort(newPort) {
-    this.settings.api_port = newPort;
+  startAPI(config) {
+    api.setPort(config.port);
+    api.start();
   }
   setCommandInitiator(commandInitiator) {
     this.settings.commandInitiator = commandInitiator;
@@ -91,9 +107,7 @@ class Settings {
       }
     }
     if(json.api != null) {
-      if(json.api.port != null) {
-        this.setAPIPort(json.api.port);
-      }
+      this.startAPI(json.api);
     }
     if(json.commandInitiator != null) {
       this.setCommandInitiator(json.commandInitiator);
@@ -102,4 +116,6 @@ class Settings {
 
 }
 
-export default Settings;
+var settings = new Settings();
+
+export default settings;
