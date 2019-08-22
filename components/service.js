@@ -1,7 +1,10 @@
 class Service {
-    constructor(hostConfig, commandController) {
-      this.cc = commandController;
+    constructor(hostConfig) {
+      //this.cc = commandController;
       this.hostConfig = hostConfig;
+    }
+
+    quit(reason) {
     }
 
     /* All Things the Service needs to provide for the commands */

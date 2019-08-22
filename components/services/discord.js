@@ -1,43 +1,35 @@
 const { Client, Attachment } = require('discord.js');
 const fs = require('fs');
-const lib = require("../lib");
+const {cleanURL, isYoutube} = require("../lib");
 const lame = require('lame');
+const ytdl = require('ytdl-core');
+const SoundCloud = require('soundcloud-api-client');
 import Service from '../service';
+import commandController from '../commandController';
+const request = require("request");
 
 class Discord extends Service {
-  constructor(hostConfig, commandController) {
-    super(hostConfig, commandController);
-    console.log("Loading Discord with config", hostConfig);
+  constructor(hostConfig) {
+    //console.log(cleanURL, isYoutube);
+    super(hostConfig);
+    //console.log("Loading Discord with config", hostConfig);
     this.stream = null;
-    this.volume = 0.05;
+    //this.volume = 0.05;
     //this.decode = null;
 
     this.sessions = {};
 
     const client = new Client();
     this.client = client;
-    this.voicechannel = null;
+    this.voicechannel = hostConfig.voicechannel;
 
-    /*mumble.connect( hostConfig.mumble_url, function( error, client ) {
-        if( error ) { throw new Error( error ); }
+    this.lastInput = null;
 
-        //client.authenticate('mp3-' + unique);
-        this.client = client;
-        client.authenticate(hostConfig.name,null,[hostConfig.token]);
-        client.on( 'initialized', function() {
-        }.bind(this));
+    this.channel;
+    this.voiceConnection;
 
+    this.DCTimer;
 
-        // Show all incoming events and the name of the event which is fired.
-        client.on( 'protocol-in', this.onDefault.bind(this));
-        client.on( 'ready', this.onReady.bind(this));
-        client.on( 'textMessage', this.onMessage.bind(this));
-
-        // Collect user information
-        client.on( 'userState', function (state) {
-          this.sessions[state.session] = state;
-        }.bind(this));
-    }.bind(this));*/
     client.on('ready', () => {
       this.onReady();
     });
@@ -50,7 +42,14 @@ class Discord extends Service {
       this.onMessage(msg);
     });
 
+    this.soundcloud = new SoundCloud('394087696');
+
     client.login(hostConfig.token);
+  }
+
+  quit(reason) {
+    console.log("Discord stopped...");
+    this.leaveAudiochannel();
   }
 
   writeLine(to, text) {
@@ -81,7 +80,7 @@ class Discord extends Service {
     if(user.id == this.client.user.id) {
       return;
     }
-    //console.log(user);
+    console.log(user);
     console.log(user.username + ':', data.content);
     let dm = false;
     if(data.channel.type == "dm") {
@@ -90,25 +89,21 @@ class Discord extends Service {
     //console.log(data.channel.id);
     var input = {
       "message": data.content,
-      "from": user.username,
+      "from": {
+        "username": user.username,
+        "id": user.id
+      },
       "to": data.channel
     };
-    for(var command in this.cc.commands) {
+    this.lastInput = input;
+    for(var command in commandController.commands) {
       try {
-        this.cc.commands[command].evaluate(input, this)
+        commandController.commands[command].evaluateMessage(input, this)
       }
       catch(err) {
         console.error(err);
       }
     }
-    /*this.cc.commands[command].evaluate(data.message).done(function(answers){
-      for(var answer in answers) {
-        if(answers[answer].audio != null) {
-          this.play.bind(this, client, answers[answer].audio)();
-        }
-        client.user.channel.sendMessage(answers[answer].text);
-      }
-    }, function(reject) {console.log("Rejected")});*/
   }
   onReady(data) {
       //console.log(this.client);
@@ -127,28 +122,122 @@ class Discord extends Service {
 
   playSound(url, onEnd) {
     console.log("PLAY SOUND!",url, onEnd);
-    var readStream = fs.createReadStream(url);
-    console.log(this.voicechannel);
-    if(!this.voicechannel) {
-      console.log("Goto join a voicechannel!");
-      let channel = this.client.channels.find("name", "General");
-      console.log(channel);
-      if(channel) {
-        channel.join().then(connection => {
-          //resolve(connection);
-          this.audiochannel = connection;
-          console.log("Joined Audiochannel!");
-          this.audiochannel.playStream(readStream);
-        });
-        //channel.playStream(readStream);
+    //console.log("Goto join a voicechannel!");
+    //let channel = this.client.channels.find("name", this.voicechannel);
+    //let channel = this.client.channels.get(this.voicechannel);
+    //let channel = this.joinAudiochannel();
+    //console.log(channel);
+    this.stopDCTimer();
+
+    let play = function(url) {
+      let connection = this.voiceConnection;
+      let dispatcher;
+      if(isYoutube(url)) {
+        // Youtube Vid
+        console.log("Youtube");
+        const stream = ytdl(url, { filter : 'audioonly' });
+        //console.log("YT Stream",stream);
+        dispatcher = connection.playStream(stream);
+        stream.on('error', function(error) {
+          console.log("YTDL error!",error);
+          //this.leaveAudiochannel();
+          this.writeLine(this.lastInput.to, "Youtube error, check log");
+        }.bind(this));
       }
+      else
+      {
+        if(fs.existsSync(url)) {
+          var readStream = fs.createReadStream(url);
+          //console.log(this.voicechannel);
+          dispatcher = connection.playStream(readStream);
+        }
+        else
+        {
+          console.log("Not on filesystem, try Request");
+          dispatcher = connection.playStream(request(url));
+        }
+      }
+
+      dispatcher.on('end', function() {
+        console.log("Dispatcher end");
+        this.startDCTimer();
+      }.bind(this));
+    }.bind(this)
+
+    if(this.voiceConnection) {
+      //console.log("Channel: exists",this.channel);
+      //console.log(this.voiceConnection);
+      play(url);
     }
     else {
-      this.audiochannel.playStream(readStream);
+      this.joinAudiochannel(play.bind(this, url));
     }
-    /*
-    */
   }
+
+  joinAudiochannel(then) {
+    this.channel = this.findAudioChannelToJoin();
+    this.channel.join().then(connection => {
+      //console.log("Connection: ", connection);
+      this.voiceConnection = connection;
+      console.log("Joined Audiochannel!");
+      if(then) {
+        then();
+      }
+    });
+  }
+
+  findAudioChannelToJoin() {
+    let channel = null;
+    //console.log("Before");
+    this.client.channels.forEach(function(value, key, map) {
+      //console.log(typeof value);
+      //console.log(key, Object.getPrototypeOf(value));
+      /*if(value.has("members")) {
+        console.log(key, value);
+      }*/
+      if(value.constructor.name == "VoiceChannel") {
+        if(value.members.has(this.lastInput.from.id)) {
+          console.log("Has member");
+          //console.log(value.members.get(this.lastInput.from.id).user.username);
+          channel = value;
+          //break;
+        }
+        /*value.members.forEach(function(value,key,map) {
+          //console.log(value.user);
+          //console.log(value.user.username);
+          if(value.user.username == username) {
+            // This channel have the user we are looking for, join this on
+            console.log(channel);
+          }
+        });*/
+      }
+    }.bind(this))
+    //console.log("After", channel);
+    if(!channel) {
+      channel = this.client.channels.get(this.voicechannel);
+    }
+    console.log("Channel: ",channel);
+    return channel;
+  }
+  leaveAudiochannel() {
+    if(this.channel) {
+      console.log("Leaving channel");
+      this.channel.leave();
+    }
+    this.channel = null;
+    this.voiceConnection = null;
+    console.log("Audioconnection reset");
+  }
+
+  startDCTimer() {
+    console.log("Starting disconnect timer with ", this.hostConfig.dctimeout, "ms wait time");
+    this.DCTimer = setTimeout(this.leaveAudiochannel.bind(this), this.hostConfig.dctimeout);
+  }
+  stopDCTimer() {
+    console.log("Clearing DCTimer");
+    clearTimeout(this.DCTimer);
+  }
+
 }
 
 export default Discord;

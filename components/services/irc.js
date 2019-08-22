@@ -19,7 +19,7 @@ class IRC {
         "to": to
       };
       for(var command in this.cc.commands) {
-        this.cc.commands[command].evaluate(input, this);
+        this.cc.commands[command].evaluateMessage(input, this);
       }
     }.bind(this));
   }
