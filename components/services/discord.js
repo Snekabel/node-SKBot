@@ -3,7 +3,7 @@ const fs = require('fs');
 const {cleanURL, isYoutube} = require("../lib");
 const lame = require('lame');
 const ytdl = require('ytdl-core');
-const SoundCloud = require('soundcloud-api-client');
+//const SoundCloud = require('soundcloud-api-client');
 import Service from '../service';
 import commandController from '../commandController';
 const request = require("request");
@@ -42,7 +42,7 @@ class Discord extends Service {
       this.onMessage(msg);
     });
 
-    this.soundcloud = new SoundCloud('394087696');
+    //this.soundcloud = new SoundCloud('394087696');
 
     client.login(hostConfig.token);
   }
@@ -68,7 +68,6 @@ class Discord extends Service {
     }
     else if(typeof to == "object") {
       // Channelobject?
-      console.log("Object");
       to.send(text);
     }
     //this.client.user.channel.sendMessage(text);
@@ -80,7 +79,7 @@ class Discord extends Service {
     if(user.id == this.client.user.id) {
       return;
     }
-    console.log(user);
+    //console.log(user);
     console.log(user.username + ':', data.content);
     let dm = false;
     if(data.channel.type == "dm") {

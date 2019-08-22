@@ -56,7 +56,7 @@ class Test extends Command {
   evaluateFile(input) {
     return;
   }
-
+  
   next() {
     console.log("Done");
   }
