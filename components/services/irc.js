@@ -1,9 +1,11 @@
 var irc = require('irc');
+import commandController from '../commandController';
+import Service from '../service';
 
-class IRC {
-  constructor(hc, commandController) {
+class IRC extends Service {
+  constructor(hostConfig) {
+    super(hostConfig);
     console.log("Loading IRC with config ",hc);
-    this.cc = commandController;
 
     var client = new irc.Client(hc.hostname, hc.name, {
       channels: hc.channels
@@ -15,11 +17,14 @@ class IRC {
 
       var input = {
         "message": message,
-        "from": from,
+        "from": {
+          "username": from,
+          "id": null
+        },
         "to": to
       };
-      for(var command in this.cc.commands) {
-        this.cc.commands[command].evaluateMessage(input, this);
+      for(let command in commandController.commands) {
+        commandController.commands[command].evaluateMessage(input, this);
       }
     }.bind(this));
   }
