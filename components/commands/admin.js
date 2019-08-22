@@ -1,9 +1,8 @@
 import Command from '../command';
-import serviceController from '../serviceController';
 
 class Template extends Command {
 
-  constructor() {
+  constructor(state) {
     super();
 
     this.helpDescription = "Template Long Help";
@@ -41,6 +40,9 @@ class Template extends Command {
         service.playSound(answers[i].audio);
       }
     }
+  }
+  evaluateFile(input) {
+    return;
   }
 }
 export default Template;

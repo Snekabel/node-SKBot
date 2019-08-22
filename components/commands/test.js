@@ -1,5 +1,6 @@
 import Command from '../command';
 var Promise = require('promise');
+import serviceController from '../serviceController';
 
 class Test extends Command {
 
@@ -12,9 +13,9 @@ class Test extends Command {
     this.counter = 0;
   }
 
-  evaluate(input, service) {
+  evaluateMessage(input, service) {
     //console.log("service",service);
-    var services = super.getServices(service);
+    var services = serviceController.getServices(service);
 
     var answers = [];
     var message = input.message;
@@ -27,9 +28,6 @@ class Test extends Command {
     }
     else if(message == "dragonforce") {
       answers.push({"text": "Playing Dragon Force: Through the Fire and the Flames", "audio": "./Music/Dragon Force - Through the Fire and Flames.mp3"});
-    }
-    else if(message == "håll käften") {
-      answers.push({"text": "HÅLL KÄFTEN", "audio": "shutup.mp3"});
     }
     else if(message == "pentiums") {
       answers.push({"text": "Weird Al Yankovic - It's all about the Pentiums", "audio": "./Music/Weird Al Yankovic- All About The Pentiums.mp3"});
@@ -47,13 +45,16 @@ class Test extends Command {
 
     for(var i in answers) {
       console.log(answers[i].text);
-      if(service.writeLine) {
+      if(service.writeLine && answers[i].text) {
         service.writeLine(input.to,answers[i].text);
       }
       if(service.playSound && answers[i].audio) {
         service.playSound(answers[i].audio, this.next);
       }
     }
+  }
+  evaluateFile(input) {
+    return;
   }
 
   next() {
