@@ -57,3 +57,14 @@ typings/
 # dotenv environment variables file
 .env
 
+settings.json
+node_modules
+node_modules.borg
+package-lock.json
+skbot.log
+TODO.txt
+Gmod Bananaphone.mp3
+Oj.mp3
+102-palette_town_theme.mp3
+shutup.mp3
+gpx/*
