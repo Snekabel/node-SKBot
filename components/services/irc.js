@@ -5,10 +5,10 @@ import Service from '../service';
 class IRC extends Service {
   constructor(hostConfig) {
     super(hostConfig);
-    console.log("Loading IRC with config ",hc);
+    console.log("Loading IRC with config ",hostConfig);
 
-    var client = new irc.Client(hc.hostname, hc.name, {
-      channels: hc.channels
+    var client = new irc.Client(hostConfig.hostname, hostConfig.name, {
+      channels: hostConfig.channels
     });
     this.client = client;
 

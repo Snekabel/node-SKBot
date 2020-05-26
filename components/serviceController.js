@@ -9,7 +9,9 @@ class ServiceController {
   loadService(name, hostConfig) {
     var service = require('./services/'+name).default;
     //console.log(service);
-    this.services[name] = (new service(hostConfig, this.cc));
+    if(hostConfig.disabled !== true) {
+      this.services[name] = (new service(hostConfig, this.cc));
+    }
   }
 
   getServices(service) {
@@ -17,12 +19,14 @@ class ServiceController {
     var others = [];
     //console.log(sc);
     for(var i in this.services) {
-      var s = this.services[i];
-      if(s == service) {
-        //console.log("OLD");
-      }
-      else {
-        others.push(s);
+      if(this.services.hasOwnProperty(i)) {
+        var s = this.services[i];
+        if(s == service) {
+          //console.log("OLD");
+        }
+        else {
+          others.push(s);
+        }
       }
     }
     return others;

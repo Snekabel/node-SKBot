@@ -57,6 +57,9 @@ class Settings {
   addDiscordHost(newHost) {
     serviceController.loadService("discord", newHost);
   }
+  addTelegramHost(newHost) {
+    serviceController.loadService("telegram", newHost);
+  }
   addEmailHost(newHost) {
     this.settings.email_connections.push(newHost);
   }
@@ -87,6 +90,13 @@ class Settings {
       for(var row in json.discord) {
         //console.log(row, this.json[row]);
         this.addDiscordHost(json.discord[row]);
+      }
+    }
+    if(json.telegram != null) {
+      console.log(json.telegram);
+      for(var row in json.telegram) {
+        //console.log(row, this.json[row]);
+        this.addTelegramHost(json.telegram[row]);
       }
     }
     if(json.email != null) {
