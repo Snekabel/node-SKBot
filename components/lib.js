@@ -1,3 +1,4 @@
+const url = require('url');
 
 exports.cleanURL = function(dirtyURL) {
   var cleanURL = dirtyURL.substring(dirtyURL.indexOf("http://"));
@@ -20,6 +21,7 @@ exports.isYoutube = function(url) {
   return url.match(regex);
 }
 exports.tryFilter = function(filter, data, then) {
+  //console.log(filter);
   let filterParts = filter.split(/\s+/);
   let dp = data.split(/\s+/);
   var result = [];
@@ -55,4 +57,30 @@ exports.tryFilter = function(filter, data, then) {
       }
   }
   then(result);
+}
+exports.findLinks = function(message) {
+  let links = [];
+
+  let split = message.split(/\s+/);
+  //console.log(split);
+  for(var i in split) {
+    if(split.hasOwnProperty(i)){
+      let word = split[i];
+      //console.log("Word: ",word);
+      if(word.indexOf("http://") > -1 || word.indexOf("https://") > -1) {
+        word = word.substring((word.indexOf("http://")||word.indexOf("https://")));
+        if(word.indexOf("\"") > -1)
+        {
+          word = word.substring(0, word.indexOf("\""));
+        }
+        word = exports.cleanURL(word);
+        //console.log("Website!",word);
+
+        links.push(
+          url.parse(word)
+        );
+      }
+    }
+  }
+  return links;
 }

@@ -110,7 +110,7 @@ exports.leaflet = function(res, token, gpx) {
    res.write('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>');
    res.write('<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>');
    res.write("</head>");
-   res.write("<body>");
+   res.write("<body style=\"margin: 0\"");
    res.write('<div id="mapid" style="height: 100vh; width: 100vw;"></div>');
    res.write('<script type="text/javascript">');
    res.write('var mymap = L.map(\'mapid\').setView([59.329751, 18.067218], 13); ');

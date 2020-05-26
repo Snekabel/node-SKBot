@@ -1,6 +1,8 @@
 import Command from '../command';
 var Promise = require('promise');
 import serviceController from '../serviceController';
+import Link from '../LinkFactory';
+import {findLinks} from '../lib';
 
 class Test extends Command {
 
@@ -14,11 +16,13 @@ class Test extends Command {
   }
 
   evaluateMessage(input, service) {
+
     //console.log("service",service);
     var services = serviceController.getServices(service);
 
     var answers = [];
     var message = input.message;
+
     if(message == "test"){
       answers.push({"text": "EVAL IS Test: "+this.counter});
       this.counter++;
@@ -38,6 +42,32 @@ class Test extends Command {
     else if(message == "youtube") {
       service.playSound("http://youtube.com/watch?v=ZI-ol25RFws");
     }
+    else if(message == "link") {
+      console.log("Test download Link");
+      console.log("LinkObject:",Link);
+      let promise = Link.getDomFromURL("https://google.se");
+      promise.then(res => {
+          console.log("Result 1:",res);
+      })
+      console.log("Download it again");
+      Link.getDomFromURL("https://google.se").then(res => {
+          console.log("Result 2:",res);
+      })
+      answers.push({"text": "Downloading hardcoded link"})
+    }
+
+    var links = findLinks(message);
+    for(var i in links) {
+      if(links.hasOwnProperty(i)) {
+        /*Link.getDomFromURL(links[i]).then(dom => {
+          var meta = dom.window.document.querySelector("[name]").getAttribute("content");
+          //console.log("META",meta);
+          if(meta != null) {
+            service.writeLine(input.to, ("Meta: "+meta));
+          }
+        });*/
+      }
+    }
 
     if(input.from == "tb") {
       answers.push({"text": "TB was here"});
@@ -56,7 +86,7 @@ class Test extends Command {
   evaluateFile(input) {
     return;
   }
-  
+
   next() {
     console.log("Done");
   }

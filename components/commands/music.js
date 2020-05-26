@@ -41,9 +41,6 @@ class Music extends Command {
       console.log("Play music");
       service.playSound(result[0],null);
     }.bind(this));
-    tryFilter("cIStop", message, function(result) {
-      console.log("Stop playing");
-    }.bind(this));
     tryFilter("cINext", message, function(result) {
       console.log("Next Song");
     }.bind(this));
@@ -161,7 +158,9 @@ class Music extends Command {
     }
   }
   stopPlaying() {
-    this.service.leaveAudiochannel();
+    if(this.service.leaveAudiochannel) {
+      this.service.leaveAudiochannel();
+    }
   }
 
   listStations() {

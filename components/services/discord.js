@@ -196,7 +196,7 @@ class Discord extends Service {
       }*/
       if(value.constructor.name == "VoiceChannel") {
         if(value.members.has(this.lastInput.from.id)) {
-          console.log("Has member");
+          //console.log("Has member");
           //console.log(value.members.get(this.lastInput.from.id).user.username);
           channel = value;
           //break;
@@ -215,7 +215,7 @@ class Discord extends Service {
     if(!channel) {
       channel = this.client.channels.get(this.voicechannel);
     }
-    console.log("Channel: ",channel);
+    //console.log("Channel: ",channel);
     return channel;
   }
   leaveAudiochannel() {

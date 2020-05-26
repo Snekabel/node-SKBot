@@ -1,5 +1,7 @@
 import Command from '../command';
 import serviceController from '../serviceController';
+import Link from '../LinkFactory';
+import {findLinks} from '../lib';
 
 class Title extends Command {
 
@@ -11,44 +13,23 @@ class Title extends Command {
   }
 
   evaluateMessage(input, service) {
-    return null;
-    /*var services = super.getServices(service);
-
     var start = (new Date).getTime();
     var message = input.message;
 
     //return answers;
-    var links = [];
-
-    var split = message.split(/\s+/);
-    for(var i in split) {
-      var word = split[i];
-      console.log("Word: ",word);
-      if(word.indexOf("http://") > -1 || word.indexOf("https://") > -1) {
-        /*var word = word.substring((word.indexOf("http://")||word.indexOf("https://")));
-        if(word.indexOf("\"") > -1)
-        {
-          word = word.substring(0, word.indexOf("\""));
-        }
-        word = this.cleanURL(word);
-        console.log("Website!",word);
-
-        links.push(
-          url.parse(word)
-        );
-      }
-    }
-
-    console.log("Links",links);
-      for(var i in links) {
-        JSDOM.fromURL.bind(this,links[i].href)().then(dom => {
+    var links = findLinks(message);
+    //console.log("Links: ",links);
+    for(var i in links) {
+      if(links.hasOwnProperty(i)) {
+        Link.getDomFromURL(links[i]).then(dom => {
           var title = dom.window.document.querySelector("title").innerHTML;
-          console.log("Title:",title);
+          //console.log("Title:",title);
           if(title != null) {
             service.writeLine(input.to, ("Title: "+title));
           }
         });
-      }*/
+      }
+    }
 
       /*async.each(links, function(item, callback){
       },
