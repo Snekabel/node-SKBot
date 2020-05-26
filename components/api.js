@@ -7,6 +7,21 @@ const parser = require('xml2json');
 const {distanceBetweenPoints, speedBetweenPoints, leaflet} = require("./mapLib");
 import commandController from './commandController';
 import serviceController from './serviceController';
+import Service from './service';
+
+class ApiService extends Service {
+  constructor(req, res) {
+    super();
+    this.req = res;
+    this.res = res;
+  }
+
+  writeLine(to, text) {
+    //this.res.writeHead(200, {'Content-Type': 'text/html'});
+    this.res.write(text);
+    this.res.end();
+  }
+}
 
 class Api {
   constructor() {
@@ -24,11 +39,13 @@ class Api {
       var router = express.Router();
 
       /*app.get('/', (req, res) => res.send('Hello World!'));*/
+      app.use(express.static('./static'));
+      app.use(express.static('./gpx'));
 
-      app.use(bodyParser.json());
+      /*app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
           extended: true
-      }));
+      }));*/
       //app.use(express.json());
       router.all('/api/v'+this.versionnumber, function (req, res, next) {
         console.log('Someone made a request!');
@@ -37,6 +54,24 @@ class Api {
       router.get('/test', function(req, res) {
         res.send("Test");
       });
+
+      router.get('/api/question/:question', function(req, res) {
+        let question = decodeURI(req.params.question);
+        let apiService = new ApiService(req,res);
+        console.log("Question:",question);
+        let input = {
+          "message":question,
+          "to":""
+        }
+        for(var command in commandController.commands) {
+          try {
+            commandController.commands[command].evaluateMessage(input, apiService)
+          }
+          catch(err) {
+            console.error(err);
+          }
+        }
+      });
       router.post('/api/v'+this.versionnumber+'/gameserver/playerJoined', function(req, res) {
         console.log("Player Joined");
         console.log(req.body);
@@ -44,7 +79,7 @@ class Api {
         let line = req.body.username+" joined "+req.body.game+" server";
         console.log(line);
         //serviceController.services["mumble"].writeLine("Snekabel", line);
-        serviceController.services["discord"].writeLine("bs", line);
+        serviceController.services["discord"].writeLine("skbot", line);
         res.send(JSON.stringify({status:"ok", playerName: req.body.username}));
       }.bind(this))
       router.post('/api/v'+this.versionnumber+'/gameserver/playerDisconnected', function(req, res) {
@@ -54,7 +89,7 @@ class Api {
         let line = req.body.username+" left "+req.body.game+" server";
         console.log(line);
         //serviceController.services["mumble"].writeLine("Snekabel", line);
-        serviceController.services["discord"].writeLine("bs", line);
+        serviceController.services["discord"].writeLine("skbot", line);
         res.send(JSON.stringify({status:"ok", playerName: req.body.username}));
       }.bind(this))
 
@@ -124,6 +159,12 @@ class Api {
           }
           res.end();
         });
+      });
+
+      router.get('/*', (req, res) => {
+          console.log("Request");
+          //res.send("Nothing");
+          //console.log("Request: ", req);
       });
 
       app.use(router);

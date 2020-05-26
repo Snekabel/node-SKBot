@@ -1,0 +1,13 @@
+body {
+  margin: 0;
+
+  .output {
+    width: 500px;
+    height: 500px;
+    border: 3px solid black;
+    overflow-x: hidden;
+    overflow-y: auto;
+    baground-color: blue;
+    color: #fff;
+  }
+}
