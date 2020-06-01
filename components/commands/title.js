@@ -2,6 +2,7 @@ import Command from '../command';
 import serviceController from '../serviceController';
 import Link from '../LinkFactory';
 import {findLinks} from '../lib';
+import Answer from '../answer';
 
 class Title extends Command {
 
@@ -16,20 +17,38 @@ class Title extends Command {
     var start = (new Date).getTime();
     var message = input.message;
 
-    //return answers;
-    var links = findLinks(message);
-    //console.log("Links: ",links);
-    for(var i in links) {
-      if(links.hasOwnProperty(i)) {
-        Link.getDomFromURL(links[i]).then(dom => {
-          var title = dom.window.document.querySelector("title").innerHTML;
-          //console.log("Title:",title);
-          if(title != null) {
-            service.writeLine(input.to, ("Title: "+title));
-          }
-        });
+    let promise = new Promise((resolve, reject) => {
+      var links = findLinks(message);
+      //console.log("Links: ",links);
+
+      let linkPromises = [];
+      for(var i in links) {
+        if(links.hasOwnProperty(i)) {
+
+          linkPromises.push(Link.getDomFromURL(links[i]).then(dom => {
+            if(dom !== null) {
+              var title = dom.window.document.querySelector("title").innerHTML;
+              //console.log("Title:",title);
+              if(title != null) {
+                //service.writeLine(input.to, ("Title: "+title));
+                return(new Answer(input.to, "Title: "+title))
+              }
+            }
+            return;
+          }));
+        }
       }
-    }
+      Promise.all(linkPromises).then(function(values) {
+        //console.log("All Links Downloaded: ", values);
+        resolve(values);
+      }.bind(this));
+
+    });
+
+    return promise;
+
+    //return answers;
+
 
       /*async.each(links, function(item, callback){
       },
