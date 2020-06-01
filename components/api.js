@@ -9,20 +9,6 @@ import commandController from './commandController';
 import serviceController from './serviceController';
 import Service from './service';
 
-class ApiService extends Service {
-  constructor(req, res) {
-    super();
-    this.req = res;
-    this.res = res;
-  }
-
-  writeLine(to, text) {
-    //this.res.writeHead(200, {'Content-Type': 'text/html'});
-    this.res.write(text);
-    this.res.end();
-  }
-}
-
 class Api {
   constructor() {
     this.versionnumber = 1;
@@ -41,6 +27,7 @@ class Api {
       /*app.get('/', (req, res) => res.send('Hello World!'));*/
       app.use(express.static('./static'));
       app.use(express.static('./gpx'));
+      app.use(express.static('./audio'));
 
       /*app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
@@ -55,22 +42,42 @@ class Api {
         res.send("Test");
       });
 
-      router.get('/api/question/:question', function(req, res) {
-        let question = decodeURI(req.params.question);
-        let apiService = new ApiService(req,res);
+      router.get('/api/question/', function(req, res) {
+        let question = decodeURI(req.query.question);
+        //let apiService = new ApiService(req,res);
         console.log("Question:",question);
         let input = {
           "message":question,
           "to":""
         }
+        let commandPromises = [];
         for(var command in commandController.commands) {
-          try {
-            commandController.commands[command].evaluateMessage(input, apiService)
-          }
-          catch(err) {
-            console.error(err);
-          }
+          commandPromises.push(commandController.commands[command].evaluateMessage(input, null))
         }
+        res.writeHead(200, {'Content-Type': 'text/html'});
+
+        Promise.all(commandPromises).then(function(values) {
+          console.log("Promise Values",values);
+          for(let v in values) {
+            if(values.hasOwnProperty(v)) {
+              // Loop all the answeres we got from different commands
+              let promiseResult = values[v];
+
+
+              for(let o in promiseResult) {
+                if(promiseResult.hasOwnProperty(o) && promiseResult[o]) {
+                  // If an command gives multiple answers loop them too
+                  let answer = promiseResult[o];
+                  if(answer.text) { res.write("<p>"+answer.text+"</p>") }
+                  if(answer.audio) {
+                    res.write("<audio autoplay controls src=\"/"+answer.audio+"\"/>");
+                  }
+                }
+              }
+            }
+          }
+          res.end();
+        }.bind(this))
       });
       router.post('/api/v'+this.versionnumber+'/gameserver/playerJoined', function(req, res) {
         console.log("Player Joined");
