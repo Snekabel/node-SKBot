@@ -1,9 +1,9 @@
-import Command from '../command';
+import Command from '../classes/command.js';
 
 class Template extends Command {
 
-  constructor(state) {
-    super();
+  constructor(settings) {
+    super(settings);
 
     this.helpDescription = "Template Long Help";
     this.shortDescription= "Template Short Help";
@@ -13,7 +13,7 @@ class Template extends Command {
 
   evaluateMessage(input, service) {
     //console.log("service",service);
-    var services = super.getServices(service);
+    //var services = super.getOtherServices(service);
 
     var answers = [];
     var message = input.message;

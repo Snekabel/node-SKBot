@@ -158,7 +158,7 @@ exports.leaflet = function(res, token, gpx) {
          }
          res.write('console.log(\'AverageSpeed: \','+exports.averageSpeedFromPoints(points)+');\n');
          res.write('console.log(\'Distance Traveled: \','+exports.distanceTraveledFromPoints(points)+');\n');
-         res.write('console.log(\'Average Height: \''+exports.averageHightDifferentFromPoints(points)+');\n');
+         res.write('console.log(\'Average Height: \','+exports.averageHightDifferentFromPoints(points)+');\n');
          res.write('var pathCoords = '+JSON.stringify(latlng)+';\n\n');
          res.write('var checkpoint = '+JSON.stringify(checkpoint)+';\n');
 

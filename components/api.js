@@ -1,13 +1,20 @@
-const express = require('express')
-const bodyParser = require('body-parser');
-const formidable = require('formidable');
-const fs = require('fs');
-const mv = require('mv');
-const parser = require('xml2json');
+//const express = require('express')
+import express from "express";
+//const bodyParser = require('body-parser');
+import bodyParser from "bodyParser";
+//const formidable = require('formidable');
+import formidable from "formidable";
+//const fs = require('fs');
+import fs from "fs";
+//const mv = require('mv');
+import mv from "mv";
+//const parser = require('xml2json');
+import parser from "xml2json";
 const {distanceBetweenPoints, speedBetweenPoints, leaflet} = require("./mapLib");
-import commandController from './commandController';
-import serviceController from './serviceController';
-import Service from './service';
+import commandController from './controllers/commandController.js';
+import serviceController from './controllers/serviceController.js';
+import Service from './service.js';
+import Answer from './classes/answer.js';
 
 class Api {
   constructor() {
@@ -18,8 +25,11 @@ class Api {
   setPort(port) {
     this.port = port;
   }
+  setSettings(settings) {
+    this.port = settings.port;
+  }
 
-  start() {
+  init() {
     if(this.port != null) {
       const app = express();
       var router = express.Router();
@@ -28,11 +38,12 @@ class Api {
       app.use(express.static('./static'));
       app.use(express.static('./gpx'));
       app.use(express.static('./audio'));
+      app.use(express.static('./images'));
 
-      /*app.use(bodyParser.json());
+      //app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
           extended: true
-      }));*/
+      }));
       //app.use(express.json());
       router.all('/api/v'+this.versionnumber, function (req, res, next) {
         console.log('Someone made a request!');
@@ -86,17 +97,21 @@ class Api {
         let line = req.body.username+" joined "+req.body.game+" server";
         console.log(line);
         //serviceController.services["mumble"].writeLine("Snekabel", line);
-        serviceController.services["discord"].writeLine("skbot", line);
+        //serviceController.services["discord"].writeLine("skbot", line);
+        let answer = new Answer("skbot", line);
+        serviceController.services["discord"].evaluateAnswer(answer);
         res.send(JSON.stringify({status:"ok", playerName: req.body.username}));
       }.bind(this))
       router.post('/api/v'+this.versionnumber+'/gameserver/playerDisconnected', function(req, res) {
         console.log("Player Disconnected");
-        console.log(req.body);
+        console.log(req);
         //console.log(serviceController);
         let line = req.body.username+" left "+req.body.game+" server";
         console.log(line);
         //serviceController.services["mumble"].writeLine("Snekabel", line);
-        serviceController.services["discord"].writeLine("skbot", line);
+        //serviceController.services["discord"].writeLine("skbot", line);
+        let answer = new Answer("skbot", line);
+        serviceController.services["discord"].evaluateAnswer(answer);
         res.send(JSON.stringify({status:"ok", playerName: req.body.username}));
       }.bind(this))
 

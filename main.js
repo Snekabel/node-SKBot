@@ -1,17 +1,12 @@
-import settings from './components/settings';
-//import Test from './components/commands/test';
-import commandController from './components/commandController';
-import serviceController from './components/serviceController';
-import api from './components/api';
+import settingsController from './components/controllers/settingsController.js';
+import commandController from './components/controllers/commandController.js';
+import serviceController from './components/controllers/serviceController.js';
+//import api from './components/api.js';
 
 var state = {};
 console.log("Starting SKBot");
 
-//var cc = new CommandController(state);
-//var sc = new ServiceController(cc);
-//cc.setSC(sc);
-//var set = new Settings(cc,sc);
-settings.readFile();
+settingsController.init();
 
 // If the Node process ends, close the Mongoose connection
 const sigs = ['SIGINT', 'SIGTERM', 'SIGQUIT']
@@ -34,24 +29,3 @@ sigs.forEach(sig => {
 //console.log(settings);
 
 //var api = new Api(cc, sc, set);
-
-//export default sc;
-
-
-//console.log(set.settings);
-//console.log(cc.commands);
-//cc.commands.test.evaluate("test");
-/*for(var command in cc.commands) {
-  cc.commands[command].evaluate("test");
-}*/
-
-/*var te = new Test();
-commands.push(te);
-
-var input = "test";
-var input2 = "intetest";
-for(var row in commands){
-    commands[row].evaluate(input);
-    commands[row].evaluate(input2);
-    //console.log(commands[row].helpDescription);
-}*/

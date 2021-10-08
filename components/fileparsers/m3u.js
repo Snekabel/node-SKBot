@@ -1,4 +1,4 @@
-import Fileparser from "../fileparser";
+import Fileparser from "../fileparser.js";
 
 class M3U extends Fileparser {
     constructor() {

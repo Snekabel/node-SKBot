@@ -1,7 +1,7 @@
 var fs = require('fs');
-import commandController from './commandController';
-import serviceController from './serviceController';
-import api from './api';
+import commandController from './controllers/commandController.js';
+import serviceController from './controllers/serviceController.js';
+//import api from './api';
 
 class Settings {
 
@@ -60,15 +60,15 @@ class Settings {
   addTelegramHost(newHost) {
     serviceController.loadService("telegram", newHost);
   }
+  addTwitchHost(newHost) {
+    serviceController.loadService("twitch", newHost);
+  }
   addEmailHost(newHost) {
     this.settings.email_connections.push(newHost);
   }
-  addCommand(newCommand) {
-    commandController.loadCommand(newCommand);
-  }
   startAPI(config) {
-    api.setPort(config.port);
-    api.start();
+    //api.setPort(config.port);
+    //api.start();
   }
   setCommandInitiator(commandInitiator) {
     this.settings.commandInitiator = commandInitiator;
@@ -110,10 +110,19 @@ class Settings {
         this.addIRCHost(json.irc[row]);
       }
     }
+    if(json.twitch != null) {
+      for(var row in json.irc)
+      {
+        if(!row.disabled) {
+          this.addTwitchHost(json.twitch[row]);
+        }
+      }
+    }
     if(json.commands != null) {
       for(var row in json.commands)
       {
-        this.addCommand(json.commands[row]);
+        //console.log("row: ",row, json.commands[row]);
+        commandController.loadCommand(row, json.commands[row]);
       }
     }
     if(json.api != null) {

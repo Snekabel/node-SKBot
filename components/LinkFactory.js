@@ -1,5 +1,9 @@
 import 'isomorphic-fetch';
-const { JSDOM } = require("jsdom");
+//const { JSDOM } = require("jsdom");
+import * as jsdom from "jsdom";
+//console.log("jsdom",jsdom);
+const JSDOM = jsdom.default.JSDOM;
+//console.log("JSDOM",JSDOM.fromURL);
 
 /*let promise = null;
 let result = null;*/
@@ -29,8 +33,13 @@ const Link = {
             return res;
         })*/
         //console.log("URL: ",url.href);
+        console.log("FromURL",JSDOM.fromURL);
         links[href] = {
           promise: JSDOM.fromURL.bind(this,url.href)()
+          .catch(function(error) {
+            console.log("We got: ",error);
+            return null
+          })
           .then(dom => {
             console.log("JSDOM Done, reseting promise");
             links[href].promise = null;

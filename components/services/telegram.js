@@ -1,6 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
-import commandController from '../commandController';
-import Service from '../service';
+import commandController from '../controllers/commandController.js';
+import Service from '../classes/service.js';
 
 class Telegram extends Service {
   constructor(hostConfig) {

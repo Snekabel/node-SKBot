@@ -1,23 +1,32 @@
-import Command from '../command';
-import commandController from '../commandController';
+import Command from '../classes/command.js';
+import commandController from '../controllers/commandController.js';
+import Answer from '../classes/answer.js';
 
 class Reload extends Command {
-  constructor(commandController) {
-    super();
+  constructor(settings) {
+    super(settings);
   }
 
   evaluateMessage(input,service){
-    var split = input.message.split(/\s+/);
-    if(split[0] == "reload" && split.length > 1) {
-      service.writeLine(input.to, (split[1]+" reloaded"));
-      this.reload(split[1]);
-    }
-  }
-  evaluateFile(input) {
-    return;
+    let promise = new Promise((resolve, reject) => {
+      let answers = [];
+      var split = input.message.split(/\s+/);
+      if(split[0] === "reload") {
+        answers.push(
+          new Answer(
+            input.to,
+            split[1]+" reloaded"
+          )
+        )
+        this.reload(split[1]);
+      }
+      resolve(answers);
+    });
+    return promise;
   }
 
   reload(commandName) {
+    console.log("Reloading ",commandName);
     commandController.loadCommand(commandName);
   }
 }

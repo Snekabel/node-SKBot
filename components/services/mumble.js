@@ -1,47 +1,108 @@
-const lame = require('lame');
-const mumble = require( 'mumble' );
-const fs = require('fs');
-const streamy = require("youtube-audio-stream");
-const lib = require("../lib");
-import Service from '../service';
+//const lame = require('lame');
+import lame from "@schneefux/lame";
+//const mumble = require( 'mumble' );
+import NoodleJS from '@acupofjose/noodle';
+//const fs = require('fs');
+import fs from "fs";
+//const streamy = require("youtube-audio-stream");
+//import streamy from "youtube-audio-stream";
+//const ytdl = require('ytdl-core');
+import ytdl from "ytdl-core";
+//const request = require("request");
+import request from "request";
+import {cleanURL, isYoutube} from "../lib.js";
+import Service from '../classes/service.js';
+import commandController from '../controllers/commandController.js';
+import Input from '../classes/input.js';
 
 class Mumble extends Service {
-  constructor(hostConfig, commandController) {
-    super(hostConfig, commandController);
-    console.log("Loading Mumble with config", hostConfig);
+  constructor(hostConfig) {
+    super(hostConfig);
+    console.log("Loading Mumble");
+    //console.log("Loading Mumble with config", hostConfig);
+    this.name = "mumble";
     this.stream = null;
     this.volume = 0.05;
     //this.decode = null;
 
     this.sessions = {};
 
-    mumble.connect( hostConfig.mumble_url, function( error, client ) {
-        if( error ) { throw new Error( error ); }
+    let client = new NoodleJS.default(
+      {
+        url: hostConfig.mumble_url,
+        name: hostConfig.name,
+        tokens: [hostConfig.token]
+      }
+    );
+    this.client = client;
 
-        //client.authenticate('mp3-' + unique);
-        this.client = client;
-        client.authenticate(hostConfig.name,null,[hostConfig.token]);
-        client.on( 'initialized', function() {
-        }.bind(this));
+    client.on('ready', this.onReady.bind(this));
+    client.on( 'initialized', init => {console.log("Init!", init);});
+    client.on( 'protocol-in', this.onDefault.bind(this));
+    client.on( 'message', message => {
+      console.log(message);
+      //console.log("Channels: ", message.channels.get(0))
+      //var user = this.sessions[data.sender];
+      let user = message.sender;
+      if(!user) return;
+      console.log(user ? user.name : "?" + ' => ' + message.sender.channel.name + ': ' + message.content);
+      var input = {
+        "message": message.content,
+        "from": {
+          "username": user.name,
+          "id": user.hash
+        },
+        "to": message.sender.channel.name
+      };
+      this.onMessage(new Input(input));
+    });
+    client.on( 'userState', state => {this.sessions[state.session] = state;});
+    client.on( 'ChannelState', state => { console.log("State: ", state); });
 
+    client.connect();
+  }
 
-        // Show all incoming events and the name of the event which is fired.
-        client.on( 'protocol-in', this.onDefault.bind(this));
-        client.on( 'ready', this.onReady.bind(this));
-        client.on( 'textMessage', this.onMessage.bind(this));
+  onReady(data) {
 
-        // Collect user information
-        client.on( 'userState', function (state) {
-          this.sessions[state.session] = state;
-        }.bind(this));
+    console.log("Mumble Connected:", data.welcomeMessage);
+    /*var list = this.client.users();
+    for(var key in list) {
+        var user = list[key];
+        console.log("  - " + user.name + " in channel " + user.channel.name);
+    }
+    console.log("\nThose were all users!");*/
+  }
+  onDefault(data) {
+    //console.log('event', data.handler, 'data', data.message);
+  }
 
-
-    }.bind(this));
+  evaluateAnswer(answer) {
+    console.log("Answer: ",answer);
+    console.log(this.name, answer.to ? answer.to.service : "No To");
+    if(answer.to.service && answer.to.service.name !== this.name) {
+      // Send this to this other service
+      console.log("Send this to another service");
+      answer.to.service.evaluateAnswer(answer);
+    }
+    else {
+      if(answer.text) {
+        this.writeLine(answer.to.recipient, answer.text);
+      }
+      if(answer.audio) {
+        this.playSound(answer.audio);
+      }
+      if(answer.fancy) {
+        this.sendFancy(answer.to.recipient, answer.fancy.title, answer.fancy.description);
+      }
+    }
   }
 
   writeLine(to, text) {
     //console.log(text);
     this.client.user.channel.sendMessage(text);
+  }
+  sendFancy(to, title, description) {
+    this.client.user.channel.sendMessage('<h1>' + title + '</h1><span style="color: red;">' + description + '</span>');
   }
 
   stopSound() {
@@ -53,28 +114,60 @@ class Mumble extends Service {
   }
 
   playSound(url, onEnd) {
-    //url = lib.cleanURL(url);
-    console.log("Mumble URL", url);
+    //url = cleanURL(url);
+    console.log("PlaySound URL", url);
+
+    this.client.voiceConnection.stopStream();
     //var stream;
-    var decoder = new lame.Decoder();
-    if(this.stream != null) {
+    //var decoder = new lame.Decoder();
+    /*if(this.stream != null) {
       this.stream.end();
       this.stream.unpipe();
       //this.stream.close();
-    }
-
-    decoder.on('format', function( format ) {
-        //console.log( format );
+    }*/
+    /*decoder.on('format', function( format ) {
+        console.log( {format} );
         this.playing = true;
-        this.stream.pipe(this.client.inputStream({
+        this.client.voiceConnection.playStream(format);
+        /*this.stream.pipe(this.client.inputStream({
               channels: format.channels,
               sampleRate: format.sampleRate,
               gain: this.volume
           })
-        );
-    }.bind(this));
-    try {
-      this.stream = streamy(url).pipe(decoder);
+        );* /
+        console.log("Client Voiceconnection playStream");
+        //this.client.voiceConnection.playStream(this.stream);
+    }.bind(this));*/
+
+    if(isYoutube(url)) {
+      // Youtube Vid
+      console.log("Youtube");
+      //this.stream = streamy(url).pipe(decoder);
+      //streamy(url).pipe(this.client.voiceConnection.playStream())
+
+      //console.log(stream, typeof stream);
+      //ytdl(url).pipe(decoder);
+      this.client.voiceConnection.playStream(ytdl(url));
+    }
+    else
+    {
+      console.log("Checking audio folder");
+      if(fs.existsSync("./audio/"+url)) {
+        console.log("Audiofile found in folder, playing");
+        //this.stream = fs.createReadStream("./audio/"+url).pipe(decoder);
+        this.client.voiceConnection.playFile("./audio/"+url);
+      }
+      else
+      {
+        console.log("Not on filesystem, try Request");
+        //this.stream = request(url).pipe(decoder);
+
+        this.client.voiceConnection.playStream(url);
+      }
+    }
+
+    /*try {
+      //this.stream = streamy(url).pipe(decoder);
       //console.log(this.stream);
       this.stream.on('format', function(format) {
         console.log("FORMAT", format);
@@ -103,7 +196,7 @@ class Mumble extends Service {
     }
     catch(err) {
       console.error(err);
-    }
+    }*/
 
 
     //stream(url).pipe(new lame.Decoder).pipe(this.client.inputStream());
@@ -122,44 +215,6 @@ class Mumble extends Service {
       newVolume = 0;
     }
     this.volume = newVolume;
-  }
-
-  onMessage(data) {
-    var user = this.sessions[data.actor];
-    console.log(user.name + ':', data.message);
-    var input = {
-      "message": data.message,
-      "from": user.name,
-      "to": null
-    };
-    for(var command in this.cc.commands) {
-      try {
-        this.cc.commands[command].evaluateMessage(input, this)
-      }
-      catch(err) {
-        console.error(err);
-      }
-    }
-    /*this.cc.commands[command].evaluateMessage(data.message).done(function(answers){
-      for(var answer in answers) {
-        if(answers[answer].audio != null) {
-          this.play.bind(this, client, answers[answer].audio)();
-        }
-        client.user.channel.sendMessage(answers[answer].text);
-      }
-    }, function(reject) {console.log("Rejected")});*/
-  }
-  onReady(data) {
-      console.log("Users:");
-      var list = this.client.users();
-      for(var key in list) {
-          var user = list[key];
-          console.log("  - " + user.name + " in channel " + user.channel.name);
-      }
-      console.log("\nThose were all users!");
-  }
-  onDefault(data) {
-    //console.log('event', data.handler, 'data', data.message);
   }
 }
 

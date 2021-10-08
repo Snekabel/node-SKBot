@@ -1,27 +1,19 @@
-//const { Client, Attachment, RichEmbed } = require('discord.js');
-import discord from "discord.js";
-const Client = discord.Client;
-const Attachment = discord.Attachment;
-const RichEmbed = discord.RichEmbed;
-//const fs = require('fs');
+import * as sdk from "matrix-js-sdk";
 import fs from "fs";
-//const ytdl = require('ytdl-core');
 import ytdl from "ytdl-core";
-//const request = require("request");
 import request from "request";
 //const SoundCloud = require('soundcloud-api-client');
-//const {cleanURL, isYoutube} = require("../lib");
 import {cleanURL, isYoutube} from "../lib.js";
 import Service from '../classes/service.js';
 import Input from '../classes/input.js';
 import commandController from '../controllers/commandController.js';
 
 
-class Discord extends Service {
+class Matrix extends Service {
   constructor(hostConfig) {
     //console.log(cleanURL, isYoutube);
     super(hostConfig);
-    this.name = "Discord";
+    this.name = "Matrix";
     //console.log("Loading Discord with config", hostConfig);
     this.stream = null;
     //this.volume = 0.05;
@@ -29,9 +21,57 @@ class Discord extends Service {
 
     this.sessions = {};
 
-    const client = new Client();
-
+    //console.log(sdk.default);
+    /*const client = sdk.default.createClient(
+      hostConfig.hostname,
+      hostConfig.accessToken,
+      hostConfig.user_id
+    );*/
+    const client = sdk.default.createClient({
+      baseUrl: hostConfig.hostname,
+      accessToken: hostConfig.access_token,
+      userId: hostConfig.user_id
+    });
     this.client = client;
+    //client.start().then(() => console.log("Client started!"));
+    //this.status();
+
+    client.on("sync", (state, prevState, data) => {
+        switch (state) {
+            case "PREPARED":
+            //console.log("PREPARED: ", state, data);
+              this.setRoomList();
+              this.setUser(data);
+              this.clearEvents();
+              this.test();
+              //printRoomList();
+              //printHelp();
+              //rl.prompt();
+            break;
+       }
+    });
+    client.on("event", (event) => {
+      console.log("Event Recived: ", event);
+    });
+    client.on("room.message", (event, room, poop) => {
+      console.log("Event: ", event, room, poop);
+    });
+
+
+    /*const content = {
+    "body": "Testing",
+    "msgtype": "m.text"
+    };
+    client.sendEvent("#chat:matrix.snekabel.se", "m.room.message", content, "", (err, res) => {
+        console.log(err);
+    });*/
+    //'!NMHowLhhlaFfAllTvu:matrix.snekabel.se'
+
+    /*client.loginWithPassword(hostConfig.username, hostConfig.password, (error, response) => {
+      console.log(error, response);
+      this.accessToken = response.access_token;
+    })*/
+
     this.voicechannel = hostConfig.voicechannel;
 
     this.lastInput = null;
@@ -40,55 +80,145 @@ class Discord extends Service {
     this.voiceConnection;
 
     this.DCTimer;
+    this.roomList = [];
 
-    client.on('ready', () => {
+    /*client.on('ready', () => {
       this.onReady();
 
       let user = this.client.user;
-      user.setStatus('idle');
-      //user.setAvatar("https://productimages.biltema.com/v1/Image/article/medium/411003/1");
-      user.setActivity("you sleep", {type: 'WATCHING'})
-    });
-
-    client.on('message', msg => {
-      /*if (msg.content === 'ping') {
-        msg.reply('pong');
-      }*/
-      //console.log(msg);
-      //this.onMessage(msg);
-
-      var user = data.author;
-      if(user.id == this.client.user.id) {
-        return;
-      }
-      //console.log(user);
-      console.log(user.username + ':', data.content);
-      let dm = false;
-      if(data.channel.type == "dm") {
-        dm = true;
-      }
-      //console.log(data.channel.id);
-      var input = {
-        "message": data.content,
-        "from": {
-          "username": user.username,
-          "id": user.id
-        },
-        "to": data.channel
-      };
-      this.lastInput = input;
-      let inputObject = new Input(input);
-
-      this.onMessage(inputObject);
-    });
+    });*/
 
     //this.soundcloud = new SoundCloud('394087696');
 
-    client.login(hostConfig.token);
+
+    /*client.on("Room.timeline", function(event, room, toStartOfTimeline) {
+      console.log("hhhh", event, room, toStartOfTimeline);
+      if (event.getType() !== "m.room.message") {
+        return; // only use messages
+      }
+      console.log("YOU GOT MAIL: ",event.event.content.body);
+    });*/
+
+
+
+    /*client.publicRooms(function(err, data) {
+      console.log("Public Rooms: %s", JSON.stringify(data));
+    });*/
+    //
+    client.startClient();
+  }
+
+  setUser(data) {
+    //this.user = state.client.user;
+  }
+
+  ready() {
+    this.client.on("Room.timeline", (event, room, toStartOfTimeline) => {
+      event.setStatus("not_sent");
+      if (toStartOfTimeline) {
+          return; // don't print paginated results
+      }
+      if (event.getType() !== "m.room.message") {
+           return; // only print messages
+       }
+      if(event.event.sender === this.hostConfig.user_id) {
+        return; // Ignore messages by the bot
+      }
+
+      let name = event.sender ? event.sender.name : event.getSender();
+      var time = new Date(
+        event.getTs()
+      ).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+      console.log("%s - %s: %s",time,name, event.event.content.body);
+
+      console.log(event.sender);
+      var input = {
+        "message": event.event.content.body,
+        "from": {
+          "username": name,
+          "id": event.sender.userId
+        },
+        "to": room.roomId
+      };
+      let inputObject = new Input(input);
+      //console.log("Input Object: ", inputObject);
+      this.onMessage(inputObject);
+      /*let line = "Fuck yeah testin!";
+      this.client.sendTextMessage(room.roomId, line).finally(function() {
+
+      });*/
+
+      //this.client.sendImageMessage(room.roomId, "https://avt.mkklcdnv6temp.com/17/p/17-1583495892.jpg", {}, "TestImg").then(res=>console.log(res))
+    });
+    this.client.on("RoomMember.membership", (event, room)=>{
+      console.log("Invite or something?",event);
+      //this.checkJoinRoom(event.target);
+    })
+  }
+
+  setRoomList() {
+    this.roomList = this.client.getRooms();
+    //console.log("RoomList: ", this.roomList);
+    for(let r in this.roomList) {
+      if(this.roomList.hasOwnProperty(r)) {
+        let room = this.roomList[r];
+
+        this.checkJoinRoom(room);
+      }
+    }
+    /*roomList.sort(function(a,b) {
+        // < 0 = a comes first (lower index) - we want high indexes = newer
+        var aMsg = a.timeline[a.timeline.length-1];
+        if (!aMsg) {
+            return -1;
+        }
+        var bMsg = b.timeline[b.timeline.length-1];
+        if (!bMsg) {
+            return 1;
+        }
+        if (aMsg.getTs() > bMsg.getTs()) {
+            return 1;
+        }
+        else if (aMsg.getTs() < bMsg.getTs()) {
+            return -1;
+        }
+        return 0;
+    });*/
+}
+  checkJoinRoom(room) {
+  if(room.getMember(this.hostConfig.user_id).membership === "invite") {
+    this.client.joinRoom(room.roomId).then(function(res) {
+      console.log("Join Room Res: ", res);
+      //setRoomList();
+      //viewingRoom = room;
+      //printMessages();
+      //rl.prompt();
+    }, function(err) {
+        print("/join Error: %s", err);
+    });
+  }
+  }
+  test() {
+    this.client.sendImageMessage("!NMHowLhhlaFfAllTvu:matrix.snekabel.se", "http://tb.snekabel.se/art/pixelart/Luffy.png", {}, "TestImg").then(res=>console.log(res))
+  }
+  clearEvents() {
+
+  }
+
+  status() {
+    console.log("CHecking Status");
+    this.client.once('sync', function(state, prevState, res) {
+      if(state === 'PREPARED') {
+          console.log("prepared");
+      } else {
+          console.log(state);
+          process.exit(1);
+      }
+    });
   }
 
   quit(reason) {
-    console.log("Discord stopped...");
+    console.log("Matrix stopped...");
     this.leaveAudiochannel();
   }
 
@@ -141,9 +271,12 @@ class Discord extends Service {
 
   writeLine(to, text) {
     //console.log("WriteLine!",to, text);
-    let channel = this.getTo(to);
-    channel.send(text);
+    //let channel = this.getTo(to);
+    //channel.send(text);
     //this.client.user.channel.sendMessage(text);
+    this.client.sendTextMessage(to, text).finally(function() {
+
+    });
   }
 
   sendImage(to, image) {
@@ -267,135 +400,6 @@ class Discord extends Service {
     //console.log('event', data.handler, 'data', data.message);
   }
 
-  playSound(audio, onEnd) {
-    console.log("PLAY SOUND!",audio, onEnd);
-    //console.log("Goto join a voicechannel!");
-    //let channel = this.client.channels.find("name", this.voicechannel);
-    //let channel = this.client.channels.get(this.voicechannel);
-    //let channel = this.joinAudiochannel();
-    //console.log(channel);
-    this.stopDCTimer();
-    let url;
-
-    let play = function(audio) {
-      let connection = this.voiceConnection;
-      let dispatcher;
-
-      if (typeof audio.pipe === "function") {
-        // Audio is a stream
-
-        dispatcher = connection.playStream(audio);
-      }
-      else if(typeof audio === "string") {
-        url = audio;
-
-        if(isYoutube(url)) {
-          // Youtube Vid
-          console.log("Youtube");
-          const stream = ytdl(url, { filter : 'audioonly' });
-          //console.log("YT Stream",stream);
-          dispatcher = connection.playStream(stream);
-          stream.on('error', function(error) {
-            console.log("YTDL error!",error);
-            //this.leaveAudiochannel();
-            this.writeLine(this.lastInput.to, "Youtube error, check log");
-          }.bind(this));
-        }
-        else
-        {
-          if(fs.existsSync("./audio/"+url)) {
-            var readStream = fs.createReadStream("./audio/"+url);
-            //console.log(this.voicechannel);
-            dispatcher = connection.playStream(readStream);
-          }
-          else
-          {
-            console.log("Not on filesystem, try Request");
-            dispatcher = connection.playStream(request(url));
-          }
-        }
-      }
-
-      dispatcher.on('end', function() {
-        console.log("Dispatcher end");
-        this.startDCTimer();
-      }.bind(this));
-    }.bind(this)
-
-    if(this.voiceConnection) {
-      //console.log("Channel: exists",this.channel);
-      //console.log(this.voiceConnection);
-      play(audio);
-    }
-    else {
-      this.joinAudiochannel(play.bind(this, audio));
-    }
-  }
-
-  joinAudiochannel(then) {
-    this.channel = this.findAudioChannelToJoin();
-    this.channel.join().then(connection => {
-      //console.log("Connection: ", connection);
-      this.voiceConnection = connection;
-      console.log("Joined Audiochannel!");
-      if(then) {
-        then();
-      }
-    });
-  }
-
-  findAudioChannelToJoin() {
-    let channel = null;
-    //console.log("Before");
-    this.client.channels.forEach(function(value, key, map) {
-      //console.log(typeof value);
-      //console.log(key, Object.getPrototypeOf(value));
-      /*if(value.has("members")) {
-        console.log(key, value);
-      }*/
-      if(value.constructor.name == "VoiceChannel") {
-        if(value.members.has(this.lastInput.from.id)) {
-          //console.log("Has member");
-          //console.log(value.members.get(this.lastInput.from.id).user.username);
-          channel = value;
-          //break;
-        }
-        /*value.members.forEach(function(value,key,map) {
-          //console.log(value.user);
-          //console.log(value.user.username);
-          if(value.user.username == username) {
-            // This channel have the user we are looking for, join this on
-            console.log(channel);
-          }
-        });*/
-      }
-    }.bind(this))
-    //console.log("After", channel);
-    if(!channel) {
-      channel = this.client.channels.get(this.voicechannel);
-    }
-    //console.log("Channel: ",channel);
-    return channel;
-  }
-  leaveAudiochannel() {
-    if(this.channel) {
-      console.log("Leaving channel");
-      this.channel.leave();
-    }
-    this.channel = null;
-    this.voiceConnection = null;
-    console.log("Audioconnection reset");
-  }
-
-  startDCTimer() {
-    console.log("Starting disconnect timer with ", this.hostConfig.dctimeout, "ms wait time");
-    this.DCTimer = setTimeout(this.leaveAudiochannel.bind(this), this.hostConfig.dctimeout);
-  }
-  stopDCTimer() {
-    console.log("Clearing DCTimer");
-    clearTimeout(this.DCTimer);
-  }
-
 }
 
-export default Discord;
+export default Matrix;

@@ -1,6 +1,8 @@
-const url = require('url');
+//const url = require('url');
+import url from "url";
 
-exports.cleanURL = function(dirtyURL) {
+//exports.cleanURL =
+function cleanURL(dirtyURL) {
   var cleanURL = dirtyURL.substring(dirtyURL.indexOf("http://"));
   if(dirtyURL.indexOf("\"") > -1)
   {
@@ -8,7 +10,8 @@ exports.cleanURL = function(dirtyURL) {
   }
   return cleanURL;
 }
-exports.getYoutube = function(youtubeUrl) {
+//exports.getYoutube =
+function getYoutube(youtubeUrl) {
   if(exports.isYoutube(youtubeUrl)) {
     console.log("Is youtube");
   }
@@ -16,11 +19,13 @@ exports.getYoutube = function(youtubeUrl) {
     console.log("IS not");
   }
 }
-exports.isYoutube = function(url) {
+//exports.isYoutube =
+function isYoutube(url) {
   let regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/g;
   return url.match(regex);
 }
-exports.tryFilter = function(filter, data, then) {
+//exports.tryFilter =
+function tryFilter(filter, data, then) {
   //console.log(filter);
   let filterParts = filter.split(/\s+/);
   let dp = data.split(/\s+/);
@@ -58,7 +63,9 @@ exports.tryFilter = function(filter, data, then) {
   }
   then(result);
 }
-exports.findLinks = function(message) {
+//exports.findLinks =
+function findLinks(message) {
+  console.log("Find Links!");
   let links = [];
 
   let split = message.split(/\s+/);
@@ -66,14 +73,14 @@ exports.findLinks = function(message) {
   for(var i in split) {
     if(split.hasOwnProperty(i)){
       let word = split[i];
-      //console.log("Word: ",word);
+      console.log("Word: ",word);
       if(word.indexOf("http://") > -1 || word.indexOf("https://") > -1) {
         word = word.substring((word.indexOf("http://")||word.indexOf("https://")));
         if(word.indexOf("\"") > -1)
         {
           word = word.substring(0, word.indexOf("\""));
         }
-        word = exports.cleanURL(word);
+        word = cleanURL(word);
         //console.log("Website!",word);
 
         links.push(
@@ -84,3 +91,10 @@ exports.findLinks = function(message) {
   }
   return links;
 }
+
+function matchRuleShort(str, rule) {
+  var escapeRegex = (str) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+  return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(str);
+}
+
+export{cleanURL, getYoutube, isYoutube, tryFilter, findLinks, matchRuleShort}

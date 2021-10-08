@@ -1,21 +1,18 @@
-import Command from '../command';
+import Command from '../classes/command.js';
 var http = require('http');
 const url = require('url');
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-var Promise = require('promise');
 var async = require("async");
-import commandController from '../commandController';
+import commandController from '../controllers/commandController.js';
 
 class File extends Command {
 
-  constructor(commandSettings) {
-    super();
+  constructor(settings) {
+    super(settings);
 
     this.helpDescription = "Downloads files linked to the bot and sends the content to other commands for parsing";
     this.shortDescription= "Downloads files linked to the bot.";
-    this.settings = commandSettings;
-
   }
 
   evaluateMessage(input, service) {

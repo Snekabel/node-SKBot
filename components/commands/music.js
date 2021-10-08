@@ -1,21 +1,22 @@
-import Command from '../command';
-const {getYoutube, tryFilter} = require("../lib");
-import serviceController from '../serviceController';
-import settings from '../settings';
+import Command from '../classes/command.js';
+//const {getYoutube, tryFilter} = require("../lib");
+import getYoutube, tryFilter from "../lib";
+import serviceController from '../controllers/serviceController.js';
+import settingsController from '../controllers/settingsController.js';
 
 class Music extends Command {
 
-  constructor(commandSettings) {
-    super();
+  constructor(settings) {
+    super(settings);
 
-    this.helpDescription = "Music component";
-    this.shortDescription= "Template Short Help";
+    this.helpDescription = "Music component. Add songs to playlist and play them in voicechat.";
+    this.commands = "!stations";
+
+    this.cI = settingsController.settings.commandInitiator;
 
     this.playlist = [];
     this.currentSong = -1;
     this.repeat = false;
-    this.cI = settings.settings.commandInitiator;
-    this.settings = commandSettings;
     this.service = null;
     this.input = null;
   }
@@ -24,7 +25,7 @@ class Music extends Command {
     //console.log("service",service);
     this.service = service;
     this.input = input;
-    var services = serviceController.getServices(service);
+    var services = serviceController.getOtherServices(service);
 
     var message = input.message;
     //var split = message.split(/\s+/);
@@ -43,17 +44,6 @@ class Music extends Command {
     }.bind(this));
     tryFilter("cINext", message, function(result) {
       console.log("Next Song");
-    }.bind(this));
-    tryFilter("cIstations $name", message, function(result) {
-      console.log("Start station");
-      this.playStation(result[0]);
-    }.bind(this));
-    tryFilter("cIstations add $name $url", message, function(result) {
-      console.log("Add Station");
-      this.addStation({name: result[0], url: result[1]});
-    }.bind(this));
-    tryFilter("cIstations", message, function() {
-      this.listStations();
     }.bind(this));
     tryFilter("cIstop", message, function(result) {
       this.stopPlaying();
@@ -137,23 +127,6 @@ class Music extends Command {
           message+= station.name+", ";
         }
         service.writeLine(input.to, message);
-      }
-    }
-  }
-  evaluateFile(input) {
-    return;
-  }
-
-  addStation(station) {
-    this.service.writeLine(this.input.to, "Adding "+station.name+" to Stations list");
-    this.settings.stations.push(station);
-  }
-
-  playStation(station) {
-    for(let i = 0; i < this.settings.stations.length; i++){
-      if(this.settings.stations[i].name == station) {
-        this.service.writeLine(this.input.to, "Playing "+station);
-        this.service.playSound(this.settings.stations[i].url,null);
       }
     }
   }
